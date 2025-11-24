@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import prisma from "../utils/prisma.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-const ACCESS_TOKEN_TTL = "30m";
+const ACCESS_TOKEN_TTL = "10s";
 export const REFRESH_TOKEN_TTL = 14 * 24 * 60 * 60 * 1000; //14 ngày
 export const registerUserService = async (userData) => {
     const { firstName, lastName, email, password, designation, department } = userData;
@@ -76,7 +76,7 @@ export const loginUserService = async (userData) => {
     // tạo refresh token
     const refreshToken = crypto.randomBytes(64).toString("hex");
     // tạo session mới để lưu refresh token
-    await prisma.RefreshToken.create({
+    await prisma.refreshToken.create({
         data: {
             token: refreshToken,     // phải là token
             userId: user.id,
@@ -93,5 +93,34 @@ export const signoutUserService = async (refreshToken) => {
             token: refreshToken
         }
     });
+};
+export const refreshTokenService = async (refreshToken) => {
+    // tìm session
+    const session = await prisma.refreshToken.findUnique({
+        where: { token: refreshToken },
+        include: { user: true }
+    });
+
+    if (!session) {
+        throw new Error("Không tìm thấy session");
+    }
+
+    if (session.expiresAt < new Date()) {
+        throw new Error("Refresh token đã hết hạn");
+    }
+
+    // tạo token mới
+    const accessToken = jwt.sign(
+        {
+            id: session.user.id,
+            role: session.user.role,
+            email: session.user.email,
+            status: session.user.status,
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: ACCESS_TOKEN_TTL }
+    );
+
+    return accessToken;
 };
 

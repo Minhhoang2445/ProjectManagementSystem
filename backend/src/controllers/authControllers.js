@@ -1,4 +1,4 @@
-import { registerUserService, loginUserService, REFRESH_TOKEN_TTL } from "../services/authService.js";
+import { registerUserService, loginUserService, REFRESH_TOKEN_TTL, refreshTokenService } from "../services/authService.js";
 import cookieParser from "cookie-parser";
 export const registerUser = async(req, res) => {
     try{
@@ -49,23 +49,45 @@ export const loginUser = async (req, res) => {
         res.status(500).json({message: "Lỗi khi đăng nhập"});
     }
 };
-
+import { signoutUserService } from "../services/authService.js";
 export const signoutUser = async (req, res) => {
     try {
         const token = req.cookies?.refreshToken;
         if(!token){
             return res.status(400).json({message: "Không tìm thấy token"});
         }
+
         await signoutUserService(token);
         res.clearCookie("refreshToken", {
             httpOnly: true,
             secure: true,
             sameSite: "none"
         });
-        return res.status(204).json({message: "Đăng xuất thành công"});
+        return res.status(200).json({message: "Đăng xuất thành công"});
     } catch (error) {
         console.log("Lỗi khi đăng xuất", error);
         res.status(500).json({message: "Lỗi khi đăng xuất"});
     }
 }
+//tạo access token mới từ refresh token, logic được thực hiện trong service
+export const refreshToken = async (req, res) => {
+    try {
+        //lấy refresh token từ cookie
+        const token = req.cookies?.refreshToken;
+
+        if (!token) {
+            return res.status(400).json({ message: "Không tìm thấy token" });
+        }
+
+        const accessToken = await refreshTokenService(token);
+
+        return res.status(200).json({
+            message: "Lấy access token mới thành công",
+            accessToken
+        });
+    } catch (error) {
+        console.log("Lỗi khi gọi refresh token", error);
+        return res.status(500).json({ message: error.message || "Lỗi hệ thống" });
+    }
+};
 
