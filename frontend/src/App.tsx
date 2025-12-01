@@ -1,9 +1,19 @@
 import { BrowserRouter, Route, Routes } from "react-router";
-import SignInPage from "./pages/SignInPage.tsx";
 import { Toaster } from "sonner";
-import SignUpPage from "./pages/SignUpPage.tsx";
-import ChatAppPage from "./pages/LogoutPage.tsx";
-import { ProtectedRoute } from "./pages/ProtectedRoute.tsx";
+
+import SignInPage from "./pages/auth/SignInPage";
+import { ProtectedRoute } from "./pages/ProtectedRoute";
+import { RoleRoute } from "./pages/RoleRoute";
+
+import AdminLayout from "./layout/AdminLayout";
+import StaffLayout from "./layout/StaffLayout";
+
+import DashboardPage from "./pages/admin/DashboardPage.tsx";
+import UsersPage from "./pages/admin/Admin_UsersPage.tsx";
+
+import StaffHomePage from "./pages/staff/StaffHomePage.tsx";
+import MyTasksPage from "./pages/staff/MyTasksPage.tsx";
+import SignUpPage from "./pages/auth/SignUpPage.tsx";
 
 function App() {
   return (
@@ -11,22 +21,27 @@ function App() {
       <Toaster richColors />
       <BrowserRouter>
         <Routes>
-          {/* public routes */}
-          <Route
-            path="/signin"
-            element={<SignInPage />}
-          />
-          <Route
-            path="/signup"
-            element={<SignUpPage />}
-          />
-
-          {/* protectect routes */}
+          {/* PUBLIC ROUTES */}
+          <Route path="/signin" element={<SignInPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+          {/* PROTECTED ROUTES */}
           <Route element={<ProtectedRoute />}>
-            <Route
-              path="/"
-              element={<ChatAppPage />}
-            />
+            {/* ADMIN */}
+            
+            <Route element={<RoleRoute role="admin" />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<DashboardPage />} />
+                <Route path="users" element={<UsersPage />} />
+              </Route>
+            </Route>
+
+            {/* STAFF */}
+            <Route element={<RoleRoute role="staff" />}>
+              <Route path="/staff" element={<StaffLayout />}>
+                <Route index element={<StaffHomePage />} />
+                <Route path="tasks" element={<MyTasksPage />} />
+              </Route>
+            </Route>
           </Route>
         </Routes>
       </BrowserRouter>

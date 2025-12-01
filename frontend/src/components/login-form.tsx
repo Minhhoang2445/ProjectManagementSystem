@@ -34,7 +34,7 @@ export function LoginForm({className,...props}: React.ComponentProps<"div">) {
   const onSubmit = async(data : LoginFomrValues) => {
     //gọi backend
     await signIn(data.email, data.password);
-    navigate("/");
+    navigate("/admin");
   };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>

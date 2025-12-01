@@ -20,8 +20,10 @@ api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const originalRequest = error.config;
+    const status = error.response?.status;
+    const message = error.response?.data?.message;
 
-    // những api không cần check
+    // Bỏ qua một số API không cần xử lý
     if (
       originalRequest.url.includes("/auth/signin") ||
       originalRequest.url.includes("/auth/signup") ||
@@ -29,11 +31,18 @@ api.interceptors.response.use(
     ) {
       return Promise.reject(error);
     }
-    // chỉ cho thử 4 lần, nếu quá 4 lần thì refresh token hết hạn, sẽ tự động logout
-    originalRequest._retryCount = originalRequest._retryCount || 0;
 
-    if (error.response?.status === 403 && originalRequest._retryCount < 4) {
-      originalRequest._retryCount += 1;
+    // 1️⃣ TOKEN EXPIRED → 401 → CHO PHÉP RETRY 4 LẦN
+    if (status === 401) {
+      originalRequest._retryCount = originalRequest._retryCount || 0;
+
+      if (originalRequest._retryCount >= 4) {
+        useAuthStore.getState().clearState();
+        return Promise.reject(error);
+      }
+
+      originalRequest._retryCount++;
+
       try {
         const res = await api.post("/auth/refresh");
         const newAccessToken = res.data.accessToken;
@@ -42,13 +51,33 @@ api.interceptors.response.use(
 
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(originalRequest);
-      } catch (refreshError) {
+      } catch (err) {
         useAuthStore.getState().clearState();
-        return Promise.reject(refreshError);
+        return Promise.reject(err);
       }
+    }
+
+    // 2️⃣ USER SUSPENDED → 403
+    if (status === 403 && message?.includes("tạm khóa")) {
+      useAuthStore.getState().clearState();
+      window.location.href = "/signin?reason=suspended";
+      return Promise.reject(error);
+    }
+
+    // 3️⃣ ROLE KHÔNG ĐỦ → 403 → KHÔNG LOGOUT
+    if (status === 403 && message?.includes("quyền")) {
+      return Promise.reject(error);
+    }
+
+    // 4️⃣ TOKEN INVALID (hack) → 403 → logout
+    if (status === 403 && message?.includes("hợp lệ")) {
+      useAuthStore.getState().clearState();
+      window.location.href = "/signin";
+      return Promise.reject(error);
     }
 
     return Promise.reject(error);
   }
 );
+
 export default api;

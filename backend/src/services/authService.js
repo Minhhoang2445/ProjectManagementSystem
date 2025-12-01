@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import prisma from "../utils/prisma.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-const ACCESS_TOKEN_TTL = "10s";
+const ACCESS_TOKEN_TTL = "15m";
 export const REFRESH_TOKEN_TTL = 14 * 24 * 60 * 60 * 1000; //14 ngày
 export const registerUserService = async (userData) => {
     const { firstName, lastName, email, password, designation, department } = userData;

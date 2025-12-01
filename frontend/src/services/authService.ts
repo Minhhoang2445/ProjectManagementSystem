@@ -42,4 +42,5 @@ export const authService = {
     const res = await api.post("/auth/refresh", { withCredentials: true });
     return res.data.accessToken;
   },
+  
 }

@@ -7,22 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id          Int      @id @default(autoincrement())
-  firstName   String
-  lastName    String
-  email       String   @unique
-  password    String
-  designation String
-  department  String
-  avatar      String?
-  role        String   @default("staff")         // <--- thêm
-  status      String   @default("pending")       // <--- thêm
-  createdAt   DateTime @default(now())
 
-  refreshTokens RefreshToken[] 
-
-}
 model RefreshToken {
   id            Int      @id @default(autoincrement())
   userId        Int
@@ -30,4 +15,165 @@ model RefreshToken {
   createdAt     DateTime @default(now())
   expiresAt     DateTime
   user      User     @relation(fields: [userId], references: [id])
+}
+// --------------------
+// ENUM DECLARATIONS
+// --------------------
+enum UserRole {
+  admin
+  staff
+}
+
+enum UserStatus {
+  pending
+  active
+  suspended
+}
+
+enum ProjectStatus {
+  planned
+  in_progress
+  completed
+  cancelled
+}
+
+enum TeamStatus {
+  active
+  inactive
+}
+
+enum TaskStatus {
+  todo
+  in_progress
+  review
+  done
+}
+
+enum TaskPriority {
+  low
+  medium
+  high
+  urgent
+}
+
+enum ProjectMemberRole {
+  project_leader
+  member
+}
+
+enum TeamMemberRole {
+  team_leader
+  member
+}
+
+// --------------------
+// USER TABLE
+// --------------------
+model User {
+  id          Int       @id @default(autoincrement())
+  firstName   String
+  lastName    String
+  email       String    @unique
+  password    String
+  designation String
+  department  String
+  avatar      String?
+  role        UserRole  @default(staff)
+  status      UserStatus @default(pending)
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  projectMembers ProjectMember[]
+  teamMembers    TeamMember[]
+  tasksAssigned  Task[]          @relation("TaskAssignee")
+  refreshTokens  RefreshToken[]
+}
+
+// --------------------
+// PROJECT TABLE
+// --------------------
+model Project {
+  id          Int             @id @default(autoincrement())
+  name        String
+  description String?
+  status      ProjectStatus    @default(planned)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime         @default(now())
+
+  // Relations
+  members     ProjectMember[]
+  teams       Team[]
+  tasks       Task[]
+}
+
+// --------------------
+// PROJECT MEMBER TABLE
+// --------------------
+model ProjectMember {
+  id            Int                 @id @default(autoincrement())
+  projectId     Int
+  userId        Int
+  roleInProject ProjectMemberRole   @default(member)
+
+  // Relations
+  project  Project @relation(fields: [projectId], references: [id])
+  user     User    @relation(fields: [userId], references: [id])
+
+  @@unique([projectId, userId]) // 1 user không thể join 2 lần cùng project
+}
+
+// --------------------
+// TEAM TABLE
+// --------------------
+model Team {
+  id          Int         @id @default(autoincrement())
+  projectId   Int
+  name        String
+  description String?
+  status      TeamStatus  @default(active)
+  createdAt   DateTime    @default(now())
+
+  // Relations
+  project     Project      @relation(fields: [projectId], references: [id])
+  members     TeamMember[]
+  tasks       Task[]
+}
+
+// --------------------
+// TEAM MEMBER TABLE
+// --------------------
+model TeamMember {
+  id          Int             @id @default(autoincrement())
+  teamId      Int
+  userId      Int
+  roleInTeam  TeamMemberRole  @default(member)
+
+  // Relations
+  team    Team @relation(fields: [teamId], references: [id])
+  user    User @relation(fields: [userId], references: [id])
+
+  @@unique([teamId, userId]) // 1 user không thể join 2 lần cùng team
+}
+
+// --------------------
+// TASK TABLE
+// --------------------
+model Task {
+  id          Int          @id @default(autoincrement())
+  title       String
+  description String?
+  status      TaskStatus    @default(todo)
+  priority    TaskPriority  @default(medium)
+  projectId   Int
+  teamId      Int?
+  assigneeId  Int
+  startDate   DateTime?
+  dueDate     DateTime?
+  createdAt   DateTime      @default(now())
+
+  // Relations
+  project     Project      @relation(fields: [projectId], references: [id])
+  team        Team?        @relation(fields: [teamId], references: [id])
+  assignee    User         @relation("TaskAssignee", fields: [assigneeId], references: [id])
 }
