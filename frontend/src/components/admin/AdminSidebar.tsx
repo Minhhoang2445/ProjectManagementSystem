@@ -10,7 +10,7 @@ const nav = [
 
 export default function AdminSidebar() {
   return (
-    <aside className="w-64 h-screen bg-sidebar border-r border-sidebar-border flex flex-col">
+    <aside className="w-64 h-full bg-sidebar border-r border-sidebar-border flex flex-col">
       <div className="h-16 flex items-center px-6 text-xl font-bold">
         Admin Panel
       </div>
@@ -22,6 +22,7 @@ export default function AdminSidebar() {
             <NavLink
               key={item.path}
               to={item.path}
+              end={item.path === "/admin"}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium 
                  ${isActive ? "bg-sidebar-accent" : "hover:bg-sidebar-accent"}`

@@ -27,3 +27,5 @@ coverage/
 
 # Prisma engine binary cache
 .prisma/
+
+uploads/avatars/

@@ -20,24 +20,7 @@ export const getAllUsersService = async() => {
         return null;
     }
 }
-export const suspendUserService = async (id) => {
-  try {
-    await prisma.user.update({
-      where: { id: Number(id) },
-      data: { status: "suspended" }
-    });
 
-    // Xóa refresh token nếu có
-    await prisma.refreshToken.deleteMany({
-      where: { userId: Number(id) }
-    });
-
-    return true;
-  } catch (error) {
-    console.error("🔥 SUSPEND USER ERROR:", error);
-    return false;
-  }
-};
 
 export const updateUserStatusService = async (id, status) => {
   try {

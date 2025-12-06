@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { userService } from "../../services/userService.ts";
+import { adminService } from "../../services/AdminService.ts";
 import type { User } from "../../types/User";
 // import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -33,7 +33,7 @@ export default function UsersPage() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const data = await userService.getAllUsers();
+      const data = await adminService.getAllUsers();
 
       // đảm bảo data là array
       setUsers(Array.isArray(data) ? data : []);
@@ -50,23 +50,13 @@ export default function UsersPage() {
     loadUsers();
   }, []);
 
-  // const handleSuspend = async (id: string) => {
-  //   if (!confirm("Suspend this user?")) return;
-
-  //   try {
-  //     await userService.updateUserStatus(id, "suspended");
-  //     toast.success("User suspended");
-  //     loadUsers();
-  //   } catch {
-  //     toast.error("Delete failed");
-  //   }
-  // };
+  
 
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold">Users Management</h1>
 
-      <div className="border rounded-lg overflow-hidden bg-card shadow-sm">
+      <div className="border rounded-lg bg-card shadow-sm h-full overflow-y-auto">
         <table className="w-full border-collapse">
           <thead className="bg-muted/50">
             <tr className="text-left text-sm text-foreground/70">
@@ -150,7 +140,7 @@ export default function UsersPage() {
                               className="capitalize flex justify-between"
                               onClick={async () => {
                                 try {
-                                  await userService.updateUserStatus(
+                                  await adminService.updateUserStatus(
                                     user.id,
                                     statusOption
                                   );

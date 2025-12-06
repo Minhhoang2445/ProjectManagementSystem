@@ -14,7 +14,7 @@ import UsersPage from "./pages/admin/Admin_UsersPage.tsx";
 import StaffHomePage from "./pages/staff/StaffHomePage.tsx";
 import MyTasksPage from "./pages/staff/MyTasksPage.tsx";
 import SignUpPage from "./pages/auth/SignUpPage.tsx";
-
+import StaffProfilePage from "./pages/staff/StaffProfilePage.tsx";
 function App() {
   return (
     <>
@@ -35,11 +35,12 @@ function App() {
               </Route>
             </Route>
 
-            {/* STAFF */}
-            <Route element={<RoleRoute role="staff" />}>
-              <Route path="/staff" element={<StaffLayout />}>
+            {/* USER */}
+            <Route element={<RoleRoute role="user" />}>
+              <Route path="/user" element={<StaffLayout />}>
                 <Route index element={<StaffHomePage />} />
                 <Route path="tasks" element={<MyTasksPage />} />
+                <Route path="profile" element={<StaffProfilePage />} />
               </Route>
             </Route>
           </Route>

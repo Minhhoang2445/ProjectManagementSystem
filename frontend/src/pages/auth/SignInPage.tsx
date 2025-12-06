@@ -14,6 +14,10 @@ export default function SignInPage() {
       toast.error("Tài khoản của bạn đã bị tạm khóa.");
       toastShown.current = true;
     }
+    else if (reason === "pending" && !toastShown.current) {
+      toast.error("Tài khoản của bạn đang chờ phê duyệt.");
+      toastShown.current = true;
+    }
   }, [reason]);
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">

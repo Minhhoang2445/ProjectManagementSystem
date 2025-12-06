@@ -1,13 +1,19 @@
 import StaffSidebar from "../components/staff/StaffSidebar.tsx";
 import { Outlet } from "react-router";
-
+import  TopNavbar  from "@/components/Navbar.tsx";
 export default function StaffLayout() {
   return (
-    <div className="flex">
-      <StaffSidebar />
-      <main className="flex-1 p-6">
-        <Outlet />
-      </main>
-    </div>
+    <div className="flex h-screen overflow-hidden flex-col">
+          <TopNavbar />
+    
+          <div className="flex flex-1 overflow-hidden">
+          <StaffSidebar />
+    
+            <main className="flex-1 overflow-y-auto p-6">
+              <Outlet />
+            </main>
+    
+          </div>
+        </div>
   );
 }

@@ -93,4 +93,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     setAccessToken: (accessToken:string) => {
         set({accessToken});
     },
+    setAvatarUser: (avatar: string) => {
+        const oldUser = get().user
+        if (!oldUser) return
+
+        set({
+            user: {
+                ...oldUser,
+                 avatar
+            }
+        })
+    }
+
 }))

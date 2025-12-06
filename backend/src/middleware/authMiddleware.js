@@ -31,6 +31,9 @@ export const protectedRoute = async (req, res, next) => {
     if (user.status === "suspended") {
       return res.status(403).json({ message: "Tài khoản của bạn đã bị tạm khóa" });
     }
+    if (user.status === "pending") {
+      return res.status(403).json({ message: "Tài khoản của bạn đang chờ phê duyệt" });
+    }
     // gắn user vào request
     req.user = user;
     next();

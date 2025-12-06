@@ -10,4 +10,6 @@ export  interface AuthState {
     signOut: () => Promise<void>;
     refreshToken: () => Promise<void>;
     setAccessToken: (accessToken:string) => void;
+    setAvatarUser: (avatar: string ) => void;
+    
 }

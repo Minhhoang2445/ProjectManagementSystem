@@ -63,7 +63,11 @@ api.interceptors.response.use(
       window.location.href = "/signin?reason=suspended";
       return Promise.reject(error);
     }
-
+    if (status === 403 && message?.includes("chờ phê duyệt")) {
+      useAuthStore.getState().clearState();
+      window.location.href = "/signin?reason=pending";
+      return Promise.reject(error);
+    }
     // 3️⃣ ROLE KHÔNG ĐỦ → 403 → KHÔNG LOGOUT
     if (status === 403 && message?.includes("quyền")) {
       return Promise.reject(error);

@@ -6,7 +6,7 @@ export interface User {
     password: string;
     department: string;
     designation: string;
-    avatarUrl?: string;
+    avatar?: string;
     role: string;
     status: string;
     createdAt: string;
