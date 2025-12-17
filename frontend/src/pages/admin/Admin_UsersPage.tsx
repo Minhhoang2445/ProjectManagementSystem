@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { adminService } from "../../services/AdminService.ts";
+import { adminService } from "../../services/adminService.ts";
 import type { User } from "../../types/User";
 // import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -53,14 +53,13 @@ export default function UsersPage() {
   
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-4">
       <h1 className="text-2xl font-semibold">Users Management</h1>
 
       <div className="border rounded-lg bg-card shadow-sm h-full overflow-y-auto">
         <table className="w-full border-collapse">
           <thead className="bg-muted/50">
             <tr className="text-left text-sm text-foreground/70">
-              <th className="p-3 border-b">ID</th>
               <th className="p-3 border-b">Name</th>
               <th className="p-3 border-b">Email</th>
               <th className="p-3 border-b">Department</th>
@@ -93,7 +92,6 @@ export default function UsersPage() {
                   key={user.id}
                   className="text-sm hover:bg-muted/40 transition-colors"
                 >
-                  <td className="p-3 border-b">{user.id}</td>
 
                   {/* FULL NAME */}
                   <td className="p-3 border-b">

@@ -2,11 +2,6 @@ import { registerUserService, loginUserService, REFRESH_TOKEN_TTL, refreshTokenS
 import cookieParser from "cookie-parser";
 export const registerUser = async(req, res) => {
     try{
-        const {firstName, lastName, email, password, designation, department} = req.body;
-        if(!firstName || !lastName || !email || !password || !designation || !department){
-            return res.status(400).json({message: "không thể thiếu các thông tin"});
-        }
-
         const newUser = await registerUserService(req.body);
 
         return res.status(201).json({message: "Tạo tài khoản thành công", user: newUser});
@@ -23,10 +18,7 @@ export const registerUser = async(req, res) => {
 export const loginUser = async (req, res) => {
     try{
         const {email, password} = req.body;
-        if(!email || !password){
-            return res.status(400).json({message: "không thể thiếu các thông tin"});
-        }
-
+       
         const { user, accessToken, refreshToken } = await loginUserService(req.body);
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,

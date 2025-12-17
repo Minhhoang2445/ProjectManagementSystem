@@ -3,7 +3,7 @@ import { Bell, Search } from "lucide-react";
 
 export default function TopNavbar() {
     const  { user } = useAuthStore()
-
+    
     return (
         <header className="w-full h-16 bg-white border-b shadow-sm flex items-center px-6 gap-6">
             {/* Left - logo */}
@@ -34,7 +34,11 @@ export default function TopNavbar() {
                 <div className="flex items-center gap-3">
                     <span className="text-sm font-medium">{user?.lastName} {user?.firstName} </span>
                     <img
-                        src={`http://localhost:5000${user?.avatar}` || "/defaultAvatar.png"}
+                        src={
+                            user?.avatar
+                                ? `http://localhost:5000${user.avatar}`
+                                : "/defaultAvatar.png"
+                        }
                         alt="avatar"
                         className="w-10 h-10 rounded-full object-cover border border-gray-300"
                     />

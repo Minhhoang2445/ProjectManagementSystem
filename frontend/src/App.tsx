@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { Toaster } from "sonner";
 
 import SignInPage from "./pages/auth/SignInPage";
@@ -10,12 +10,22 @@ import StaffLayout from "./layout/StaffLayout";
 
 import DashboardPage from "./pages/admin/DashboardPage.tsx";
 import UsersPage from "./pages/admin/Admin_UsersPage.tsx";
+import ProjectPage from "./pages/admin/ProjectPage.tsx";
 
 import StaffHomePage from "./pages/staff/StaffHomePage.tsx";
 import MyTasksPage from "./pages/staff/MyTasksPage.tsx";
 import SignUpPage from "./pages/auth/SignUpPage.tsx";
 import StaffProfilePage from "./pages/staff/StaffProfilePage.tsx";
+import ProjectListPage from "./pages/admin/ProjectListPage.tsx";
+import CreateProjectPage from "./pages/admin/CreateProjectPage.tsx";
+import ProjectDetailPage from "./pages/admin/ProjectDetailPage.tsx";
+import ProjectKanban from "./components/project/ProjectKanban.tsx";
+import ProjectMembers from "./components/project/ProjectMembers.tsx";
+import ProjectOverview from "./components/project/ProjectOverview.tsx";
+import { useAuthStore } from "./store/useAuthStore.ts";
+import React from "react";
 function App() {
+  
   return (
     <>
       <Toaster richColors />
@@ -32,6 +42,25 @@ function App() {
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<DashboardPage />} />
                 <Route path="users" element={<UsersPage />} />
+                <Route path="projects">
+                  <Route index element={<ProjectPage />} />
+                  <Route path="list" element={<ProjectListPage />} />
+                  <Route path="create" element={<CreateProjectPage />} />
+
+                  {/* PROJECT DETAIL */}
+                  <Route path=":projectId" element={<ProjectDetailPage />}>
+                    <Route index element={<Navigate to="overview" replace />} />
+
+                    <Route path="overview" element={<ProjectOverview />} />
+
+                    {/* CÁC TAB KHÁC */}
+                    {/* <Route path="tasks" element={<ProjectKanban />} />
+                    <Route path="members" element={<ProjectMembers />} /> */}
+                    {/* <Route path="settings" element={<ProjectSettings />} /> */}
+                  </Route>
+                </Route>
+
+
               </Route>
             </Route>
 

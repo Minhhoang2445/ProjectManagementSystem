@@ -1,4 +1,6 @@
 import type { User } from "./User";
+import type { Project } from "./Project";
+import type { Task } from "./Task"
 export  interface AuthState {
     accessToken: string | null;
     user: User | null;
@@ -12,4 +14,27 @@ export  interface AuthState {
     setAccessToken: (accessToken:string) => void;
     setAvatarUser: (avatar: string ) => void;
     
+}
+export interface projectState {
+    projects: Project[];
+    selectedProject: Project | null;
+    isLoading: boolean;
+
+    fetchProjects: () => Promise<void>;
+    fetchProjectById: (id: number) => Promise<void>;
+    createProject: (
+        name: string,
+        description: string ,
+        startDate: string ,
+        endDate: string ,
+        members: { userId: number; role: string } []
+    ) => Promise<void>;
+    getUserProjects: (userId: number) => Promise<void>;
+}
+export interface taskState {
+    tasks: Task[];
+    selectedTask: Task | null ;
+    isLoading: boolean;
+    fetchTasks: () => Promise<void>;
+    fetchTaskById: (id: number) => Promise<void>;
 }

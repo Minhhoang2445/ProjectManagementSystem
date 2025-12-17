@@ -1,24 +1,24 @@
 import prisma from "../utils/prisma.js";
-export const getAllUsersService = async() => {
-    try {
-        const users = await prisma.user.findMany({
-            orderBy: { id: "asc" },
-        select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            role: true,
-            department: true,
-            designation: true,
-            status: true,
-        }
+export const getAllUsersService = async () => {
+  try {
+    const users = await prisma.user.findMany({
+      orderBy: { id: "asc" },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        role: true,
+        department: true,
+        designation: true,
+        status: true,
+      }
     });
     return users;
-    } catch (error) {
+  } catch (error) {
     console.error("🔥 PRISMA ERROR:", error);
-        return null;
-    }
+    return null;
+  }
 }
 
 
@@ -50,6 +50,3 @@ export const updateUserStatusService = async (id, status) => {
     throw error;
   }
 };
-
-
-
