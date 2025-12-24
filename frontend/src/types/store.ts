@@ -37,4 +37,7 @@ export interface taskState {
     isLoading: boolean;
     fetchTasks: () => Promise<void>;
     fetchTaskById: (id: number) => Promise<void>;
+    getTasksByProjectId: (projectId: number) => Promise<void>;
+    getUserTasks: () => Promise<void>;
+    createTask: (id: number, data: any) => Promise<void>;
 }

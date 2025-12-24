@@ -169,3 +169,29 @@ export const getTaskByIdService = async ({ taskId, projectId }) => {
         throw error;
     }
 };
+export const getUserTasksService = async (userId) => {
+    try {
+        return await prisma.task.findMany({
+            where: { assigneeId: Number(userId) },
+            orderBy: { id: "asc" },
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                status: true,
+                priority: true,
+                startDate: true,
+                dueDate: true,
+                project: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
+            },
+        });
+    } catch (error) {
+        console.error("PRISMA ERROR:", error);
+        throw error;
+    }
+};

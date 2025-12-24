@@ -1,4 +1,4 @@
-import { createTaskService, getTasksByProjectIdService, getTaskByIdService  } from "../services/taskService.js";
+import { createTaskService, getTasksByProjectIdService, getTaskByIdService, getUserTasksService  } from "../services/taskService.js";
 export const createTaskController = async (req, res) => {
     try {
         const task = await createTaskService(req.body);
@@ -39,5 +39,15 @@ export const getTaskByIdController = async (req, res) => {
     } catch (error) {
         console.error("CONTROLLER ERROR:", error);
         res.status(500).json({ message: "Failed to fetch task" });
+    }
+};
+export const getUserTasksController = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const tasks = await getUserTasksService(userId);
+        res.status(200).json(tasks);
+    } catch (error) {
+        console.error("CONTROLLER ERROR:", error);
+        res.status(500).json({ message: "Failed to fetch user tasks" });
     }
 };

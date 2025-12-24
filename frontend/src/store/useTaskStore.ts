@@ -35,6 +35,41 @@ export const useTaskStore = create<taskState>((set, get) => ({
             set({ isLoading: false });
         }
     },
-
-    
+    getTasksByProjectId: async (projectId: number) => {
+        try {
+            set({ isLoading: true });
+            const tasks = await taskService.getTasksByProjectId(projectId);
+            set({ tasks });
+        } catch (error) {
+            console.error(error);
+            toast.error("Không thể tải danh sách công việc cho dự án");
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+    getUserTasks: async () => {
+        try {
+            set({ isLoading: true });
+            const tasks = await taskService.getUserTasks();
+            set({ tasks });
+        } catch (error) {
+            console.error(error);
+            toast.error("Không thể tải danh sách công việc của bạn");
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+    createTask: async (id: number, data: any) => {
+        try {
+            set({ isLoading: true });
+            const newTask = await taskService.createTask(id, data);
+            set({ tasks: [...get().tasks, newTask] });
+            toast.success("Tạo công việc thành công!");
+        } catch (error) {
+            console.error(error);
+            toast.error("Tạo công việc thất bại");
+        } finally {
+            set({ isLoading: false });
+        }
+    }
 }));

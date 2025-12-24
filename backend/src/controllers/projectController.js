@@ -46,3 +46,10 @@ export const getUserProjectsController = async (req, res) => {
         return res.status(500).json({ message: "Internal server error" });
     }
 };
+export const updateTaskController = async (req, res) => {
+    
+};
+
+export const deleteTaskController = async (req, res) => {
+    // Implementation for deleting a task within a project
+};

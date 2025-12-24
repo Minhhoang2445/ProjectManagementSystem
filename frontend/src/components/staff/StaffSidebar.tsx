@@ -45,7 +45,6 @@ export default function StaffSidebar() {
       </div>
 
       <nav className="px-3 space-y-1">
-
         {/* Home */}
         <NavLink
           to="/user"
@@ -58,8 +57,8 @@ export default function StaffSidebar() {
           <Home size={18} />
           Home
         </NavLink>
-
-        {/* My Spaces (Dropdown) */}
+        {/* My spaces  */}
+        
         <button
           onClick={() => setOpenSpaces(!openSpaces)}
           className={`
@@ -76,7 +75,7 @@ export default function StaffSidebar() {
             className={`transition-transform ${openSpaces ? "rotate-180" : ""}`}
           />
         </button>
-
+        
         {/* Space list */}
         {openSpaces && (
           <div className="ml-6 mt-1 space-y-1">

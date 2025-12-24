@@ -68,7 +68,11 @@ function App() {
             <Route element={<RoleRoute role="user" />}>
               <Route path="/user" element={<StaffLayout />}>
                 <Route index element={<StaffHomePage />} />
-                <Route path="tasks" element={<MyTasksPage />} />
+
+                <Route path="spaces" element={<MyTasksPage />}>
+                    <Route path=":projectId" element={<ProjectKanban />} />
+                </Route>
+
                 <Route path="profile" element={<StaffProfilePage />} />
               </Route>
             </Route>

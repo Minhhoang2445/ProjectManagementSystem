@@ -56,7 +56,22 @@ export const getProjectByIdService = async (id) => {
                 name: true,
                 description: true,
                 startDate: true,
-                endDate: true
+                endDate: true,
+                members: {
+                    select: {
+                        userId: true,
+                        roleInProject: true,
+                        user: {
+                            select: {
+                                id: true,
+                                firstName: true,
+                                lastName: true,
+                                email: true,
+                                avatar: true
+                            }
+                        }
+                    }
+                }
             }
         });
         return project;

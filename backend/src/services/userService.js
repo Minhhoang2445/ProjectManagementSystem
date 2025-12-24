@@ -9,7 +9,7 @@ export const getUserInfoService = async (id) => {
                 lastName: true,
                 email: true,
                 role: true,
-                department: true,
+                department: true,  
                 designation: true,
                 status: true,
                 avatar: true,
@@ -23,6 +23,8 @@ export const getUserInfoService = async (id) => {
         return null;
     }
 }
+
+
 
 export const updateUserAvatarService = async (id, avatar) => {
     try{

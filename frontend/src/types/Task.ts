@@ -11,3 +11,13 @@ export interface Task {
     createdAt: string;
     updatedAt: string;
 }
+export type CreateTaskFormData = Omit<Task, "id" | "createdAt" | "updatedAt" | "projectId"> & {
+    
+    assigneeId?: number;
+};
+import type { User } from "@/types/User";
+export interface ProjectMemberSummary {
+    userId: number;
+    firstName: User["firstName"];
+    lastName: User["lastName"];
+}

@@ -8,5 +8,9 @@ export const userService = {
         const res = await axios.post("/user/me/avatar", formData);  
 
         return res.data;
+    },
+    getAllUsers: async () => {
+        const res = await axios.get("/user");
+        return res.data;
     }
 };
