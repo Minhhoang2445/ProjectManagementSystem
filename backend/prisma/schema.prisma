@@ -47,6 +47,7 @@ enum TaskStatus {
   in_progress
   review
   done
+  cancelled
 }
 
 enum TaskPriority {

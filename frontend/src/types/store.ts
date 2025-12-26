@@ -40,4 +40,5 @@ export interface taskState {
     getTasksByProjectId: (projectId: number) => Promise<void>;
     getUserTasks: () => Promise<void>;
     createTask: (id: number, data: any) => Promise<void>;
+    deleteTask: (projectId: number, taskId: number) => Promise<void>;
 }

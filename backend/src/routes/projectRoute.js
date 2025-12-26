@@ -10,11 +10,11 @@ import { canCreateAndDeleteTask, canSeeTask } from "../middleware/taskPermission
 import { createTaskController, getTasksByProjectIdController, getTaskByIdController, getUserTasksController, deleteTaskController } from "../controllers/taskController.js";
 const router = express.Router();
 
-router.post("/",protectedRoute,adminOnly,validateBody(projectSchema),createProject);
+router.post("/", protectedRoute, adminOnly, validateBody(projectSchema), createProject);
 
-router.get("/",protectedRoute,adminOnly,getAllProjects);
+router.get("/", protectedRoute, adminOnly, getAllProjects);
 
-router.get("/:projectId",protectedRoute,projectAccess,getProjectById);
+router.get("/:projectId", protectedRoute, projectAccess, getProjectById);
 router.get("/user/me/projects", protectedRoute, getUserProjectsController);
 
 

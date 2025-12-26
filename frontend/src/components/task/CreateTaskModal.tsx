@@ -36,7 +36,7 @@ export default function CreateTaskModal({
             assigneeId: undefined,
         },
     });
-    
+
     useEffect(() => {
         if (isOpen) {
             reset({
@@ -141,7 +141,7 @@ export default function CreateTaskModal({
                                 <select
                                     id="assigneeId"
                                     {...register("assigneeId", {
-                                        valueAsNumber: true 
+                                        valueAsNumber: true
                                     })}
                                     className={inputClass}
                                 >
@@ -149,7 +149,7 @@ export default function CreateTaskModal({
                                     {members.map((member) => (
                                         <option key={member.userId} value={member.userId}>
                                             {member.firstName} {member.lastName}
-                                            
+
                                         </option>
                                     ))}
                                 </select>

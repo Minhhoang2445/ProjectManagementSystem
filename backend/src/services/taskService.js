@@ -1,4 +1,5 @@
 import prisma from "../utils/prisma.js";
+
 export const createTaskService = async (taskData) => {
     try {
         const { title, description, status, priority, dueDate, projectId, assigneeId, teamId = null } = taskData;
@@ -48,6 +49,7 @@ export const createTaskService = async (taskData) => {
     }
 };
 
+
 export const getTasksByProjectIdService = async ({
     projectId,
     userId,
@@ -80,6 +82,7 @@ export const getTasksByProjectIdService = async ({
                             name: true,
                         },
                     },
+                    attachments: true,
                 },
             });
         }
@@ -153,6 +156,7 @@ export const getTaskByIdService = async ({ taskId, projectId }) => {
                 status: true,
                 priority: true,
                 dueDate: true,
+                attachments: true,
                 assignee: {
                     select: {
                         id: true,

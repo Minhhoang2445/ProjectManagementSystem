@@ -71,5 +71,18 @@ export const useTaskStore = create<taskState>((set, get) => ({
         } finally {
             set({ isLoading: false });
         }
+    },
+    deleteTask: async (projectId: number, taskId: number) => {
+        try {
+            set({ isLoading: true });
+            await taskService.deleteTask(projectId, taskId);
+            set({ tasks: get().tasks.filter(task => task.id !== taskId) });
+            toast.success("Xóa công việc thành công!");
+        } catch (error) {
+            console.error(error);
+            toast.error("Xóa công việc thất bại");
+        } finally {
+            set({ isLoading: false });
+        }
     }
 }));
