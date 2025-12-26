@@ -87,6 +87,7 @@ model User {
   teamMembers    TeamMember[]
   tasksAssigned  Task[]          @relation("TaskAssignee")
   refreshTokens  RefreshToken[]
+  attachments    TaskAttachment[]
 }
 
 // --------------------
@@ -171,9 +172,25 @@ model Task {
   startDate   DateTime?
   dueDate     DateTime?
   createdAt   DateTime      @default(now())
-
+attachments TaskAttachment[]
   // Relations
   project     Project      @relation(fields: [projectId], references: [id])
   team        Team?        @relation(fields: [teamId], references: [id])
   assignee    User         @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  
+}
+model TaskAttachment {
+  id        Int      @id @default(autoincrement())
+  fileName  String   // Tên file gốc
+  filePath  String   // Đường dẫn lưu trên server/cloud
+  fileType  String?  // jpg, pdf, docx...
+  fileSize  Int?     // Kích thước file
+  createdAt DateTime @default(now())
+  
+  taskId    Int
+  userId    Int      // Người upload file
+
+  // Relations
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploader  User     @relation(fields: [userId], references: [id])
 }

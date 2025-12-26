@@ -1,4 +1,4 @@
-import { createTaskService, getTasksByProjectIdService, getTaskByIdService, getUserTasksService  } from "../services/taskService.js";
+import { createTaskService, getTasksByProjectIdService, getTaskByIdService, getUserTasksService, deleteTaskService  } from "../services/taskService.js";
 export const createTaskController = async (req, res) => {
     try {
         const task = await createTaskService(req.body);
@@ -49,5 +49,22 @@ export const getUserTasksController = async (req, res) => {
     } catch (error) {
         console.error("CONTROLLER ERROR:", error);
         res.status(500).json({ message: "Failed to fetch user tasks" });
+    }
+};
+export const deleteTaskController = async (req, res) => {
+    try {
+        const taskId = Number(req.params.taskId);
+        const projectId = req.projectId;
+        if (!taskId) {
+            return res.status(400).json({ message: "Invalid task id" });
+        }
+        const deleted = await deleteTaskService({ taskId, projectId });
+        if (!deleted) {
+            return res.status(404).json({ message: "Task not found" });
+        }
+        return res.status(200).json({ message: "Task deleted successfully" });
+    } catch (error) {
+        console.error("CONTROLLER ERROR:", error);
+        res.status(500).json({ message: "Failed to delete task" });
     }
 };

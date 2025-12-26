@@ -195,3 +195,17 @@ export const getUserTasksService = async (userId) => {
         throw error;
     }
 };
+export const deleteTaskService = async ({ taskId, projectId }) => {
+    try {
+        const deletedTask = await prisma.task.deleteMany({
+            where: {
+                id: Number(taskId),
+                projectId: Number(projectId),
+            },
+        });
+        return deletedTask.count > 0;
+    } catch (error) {
+        console.error("PRISMA ERROR:", error);
+        throw error;
+    }
+};

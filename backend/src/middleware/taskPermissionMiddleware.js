@@ -1,6 +1,6 @@
 import prisma from "../utils/prisma.js";
 
-export const canCreateTask = async (req, res, next) => {
+export const canCreateAndDeleteTask = async (req, res, next) => {
     try {
         const { roleInProject } = req.projectMember;
         const userId = req.user.id;
@@ -24,7 +24,7 @@ export const canCreateTask = async (req, res, next) => {
             if (!teamLeader) {
                 return res
                     .status(403)
-                    .json({ message: "You do not have permission to create tasks" });
+                    .json({ message: "You do not have permission to create or delete tasks" });
             }
 
             return next();
