@@ -26,54 +26,6 @@ import {
   YAxis,
 } from "recharts";
 
-// Mock Data
-const stats = [
-  {
-    title: "Total Projects",
-    value: "12",
-    description: "+2 from last month",
-    icon: LayoutDashboard,
-    className: "text-blue-600",
-  },
-  {
-    title: "Total Tasks",
-    value: "148",
-    description: "+12% completion rate",
-    icon: CheckCircle2,
-    className: "text-green-600",
-  },
-  {
-    title: "Active Members",
-    value: "24",
-    description: "4 new joined this week",
-    icon: Users,
-    className: "text-violet-600",
-  },
-  {
-    title: "Hours Logged",
-    value: "1,204",
-    description: "+8% from last week",
-    icon: Clock,
-    className: "text-orange-600",
-  },
-];
-
-const taskStatusData = [
-  { name: "To Do", value: 35, color: "#cbd5e1" }, // slate-300
-  { name: "In Progress", value: 45, color: "#3b82f6" }, // blue-500
-  { name: "Done", value: 68, color: "#22c55e" }, // green-500
-];
-
-const weeklyActivityData = [
-  { name: "Mon", created: 4, completed: 6 },
-  { name: "Tue", created: 7, completed: 5 },
-  { name: "Wed", created: 5, completed: 8 },
-  { name: "Thu", created: 8, completed: 10 },
-  { name: "Fri", created: 6, completed: 7 },
-  { name: "Sat", created: 2, completed: 3 },
-  { name: "Sun", created: 1, completed: 1 },
-];
-
 const recentActivities = [
   {
     user: "Sarah Chen",
@@ -105,7 +57,7 @@ const recentActivities = [
   },
 ];
 import { useEffect, useState } from "react";
-import { getSystemStats, SystemStats } from "@/services/adminService";
+import { getSystemStats, type SystemStats } from "@/services/adminService";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<SystemStats | null>(null);
@@ -193,14 +145,7 @@ export default function DashboardPage() {
     const dayTasks = stats?.last7DaysTasks.filter(
       (t) => t.createdAt.split("T")[0] === date
     );
-    // As mentioned in backend, checking "completed" is hard without completedAt.
-    // For now, we will just show "Created" per day.
-    // To match the UI, I'll mock "Completed" or just remove it?
-    // Let's count tasks that are "done" AND created on that day as "Completed" (which is wrong but serves as a placeholder)
-    // OR we just remove the "Completed" bar for now?
-    // Let's keep it but leave it 0 or random for now if we want to be strictly accurate to "not having data".
-    // Or better: Count "done" tasks in the `dayTasks` list. This means tasks created that day that are already done.
-
+    
     return {
       name: new Date(date).toLocaleDateString("en-US", { weekday: "short" }),
       created: dayTasks?.length || 0,

@@ -24,61 +24,66 @@ import ProjectMembers from "./components/project/ProjectMembers.tsx";
 import ProjectOverview from "./components/project/ProjectOverview.tsx";
 import { useAuthStore } from "./store/useAuthStore.ts";
 import React from "react";
+import { ThemeProvider } from "./components/theme-provider";
+import SettingsPage from "./pages/admin/SettingsPage";
 function App() {
-  
   return (
     <>
-      <Toaster richColors />
-      <BrowserRouter>
-        <Routes>
-          {/* PUBLIC ROUTES */}
-          <Route path="/signin" element={<SignInPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
-          {/* PROTECTED ROUTES */}
-          <Route element={<ProtectedRoute />}>
-            {/* ADMIN */}
-            
-            <Route element={<RoleRoute role="admin" />}>
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<DashboardPage />} />
-                <Route path="users" element={<UsersPage />} />
-                <Route path="projects">
-                  <Route index element={<ProjectPage />} />
-                  <Route path="list" element={<ProjectListPage />} />
-                  <Route path="create" element={<CreateProjectPage />} />
+      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+        <Toaster richColors />
+        <BrowserRouter>
+          <Routes>
+            {/* PUBLIC ROUTES */}
+            <Route path="/signin" element={<SignInPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
+            {/* PROTECTED ROUTES */}
+            <Route element={<ProtectedRoute />}>
+              {/* ADMIN */}
 
-                  {/* PROJECT DETAIL */}
-                  <Route path=":projectId" element={<ProjectDetailPage />}>
-                    <Route index element={<Navigate to="overview" replace />} />
+              <Route element={<RoleRoute role="admin" />}>
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<DashboardPage />} />
+                  <Route path="settings" element={<SettingsPage />} />
+                  <Route path="users" element={<UsersPage />} />
+                  <Route path="projects">
+                    <Route index element={<ProjectPage />} />
+                    <Route path="list" element={<ProjectListPage />} />
+                    <Route path="create" element={<CreateProjectPage />} />
 
-                    <Route path="overview" element={<ProjectOverview />} />
-                    <Route path="tasks" element={<ProjectKanban />} />
-                    {/* CÁC TAB KHÁC */}
-                    {/* <Route path="tasks" element={<ProjectKanban />} />
+                    {/* PROJECT DETAIL */}
+                    <Route path=":projectId" element={<ProjectDetailPage />}>
+                      <Route
+                        index
+                        element={<Navigate to="overview" replace />}
+                      />
+
+                      <Route path="overview" element={<ProjectOverview />} />
+                      <Route path="tasks" element={<ProjectKanban />} />
+                      {/* CÁC TAB KHÁC */}
+                      {/* <Route path="tasks" element={<ProjectKanban />} />
                     <Route path="members" element={<ProjectMembers />} /> */}
-                    {/* <Route path="settings" element={<ProjectSettings />} /> */}
+                      {/* <Route path="settings" element={<ProjectSettings />} /> */}
+                    </Route>
                   </Route>
                 </Route>
-
-
               </Route>
-            </Route>
 
-            {/* USER */}
-            <Route element={<RoleRoute role="user" />}>
-              <Route path="/user" element={<StaffLayout />}>
-                <Route index element={<StaffHomePage />} />
+              {/* USER */}
+              <Route element={<RoleRoute role="user" />}>
+                <Route path="/user" element={<StaffLayout />}>
+                  <Route index element={<StaffHomePage />} />
 
-                <Route path="spaces" element={<MyTasksPage />}>
+                  <Route path="spaces" element={<MyTasksPage />}>
                     <Route path=":projectId" element={<ProjectKanban />} />
-                </Route>
+                  </Route>
 
-                <Route path="profile" element={<StaffProfilePage />} />
+                  <Route path="profile" element={<StaffProfilePage />} />
+                </Route>
               </Route>
             </Route>
-          </Route>
-        </Routes>
-      </BrowserRouter>
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
     </>
   );
 }
