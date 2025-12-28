@@ -23,10 +23,10 @@ export const useTaskStore = create<taskState>((set, get) => ({
         }
     },
 
-    fetchTaskById: async (id: number) => {
+    fetchTaskById: async (projectId: number, id: number) => {
         try {
             set({ isLoading: true });
-            const task = await taskService.getTaskById(id);
+            const task = await taskService.getTaskById(projectId, id);
             set({ selectedTask: task });
         } catch (error) {
             console.error(error);
@@ -84,5 +84,43 @@ export const useTaskStore = create<taskState>((set, get) => ({
         } finally {
             set({ isLoading: false });
         }
-    }
+    },
+    updateTask: async (projectId: number, taskId: number, data: any) => {
+        try {
+            set({ isLoading: true });
+            const updatedTask = await taskService.updateTask(projectId, taskId, data);
+            set({
+                tasks: get().tasks.map(task =>
+                    task.id === taskId ? updatedTask : task
+                ),
+            });
+            toast.success("Cập nhật công việc thành công!");
+        } catch (error) {
+            console.error(error);
+            toast.error("Cập nhật công việc thất bại");
+        }
+        finally {
+            set({ isLoading: false });
+        }
+    },
+    uploadTaskAttachments: async (projectId: number, taskId: number, files: FileList) => {
+        try {
+            set({ isLoading: true });
+
+            const formData = new FormData();
+            Array.from(files).forEach((file) => {
+                formData.append("files", file);
+            });
+
+            await taskService.uploadTaskAttachments(projectId, taskId, formData);
+
+            toast.success("Upload file thành công!");
+        } catch (error) {
+            console.error(error);
+            toast.error("Upload file thất bại");
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+
 }));

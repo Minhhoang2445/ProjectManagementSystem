@@ -7,7 +7,8 @@ import { projectSchema } from "../schema/project.schema.js";
 import { projectAccess } from "../middleware/projectAccessMiddleware.js";
 import { createTaskSchema } from "../schema/task.schema.js";
 import { canCreateAndDeleteTask, canSeeTask } from "../middleware/taskPermissionMiddleware.js";
-import { createTaskController, getTasksByProjectIdController, getTaskByIdController, getUserTasksController, deleteTaskController } from "../controllers/taskController.js";
+import { uploadTaskAttachment } from "../middleware/uploadMiddleware.js";
+import { createTaskController, getTasksByProjectIdController, getTaskByIdController, getUserTasksController, deleteTaskController, updateTaskController, uploadTaskAttachmentController } from "../controllers/taskController.js";
 const router = express.Router();
 
 router.post("/", protectedRoute, adminOnly, validateBody(projectSchema), createProject);
@@ -19,9 +20,11 @@ router.get("/user/me/projects", protectedRoute, getUserProjectsController);
 
 
 // route task related to project
-router.post("/:projectId/tasks", protectedRoute, projectAccess, canCreateAndDeleteTask, validateBody(createTaskSchema), createTaskController);
+router.post("/:projectId/tasks", protectedRoute, projectAccess, canCreateAndDeleteTask, uploadTaskAttachment.array("files", 10), createTaskController);
 router.get("/:projectId/tasks", protectedRoute, projectAccess, getTasksByProjectIdController);
 router.get("/:projectId/tasks/:taskId", protectedRoute, projectAccess, canSeeTask, getTaskByIdController);
 router.get("/user/me/tasks", protectedRoute, getUserTasksController);
 router.delete("/:projectId/tasks/:taskId", protectedRoute, projectAccess, canCreateAndDeleteTask, deleteTaskController);
-export default router;
+router.patch("/:projectId/tasks/:taskId", protectedRoute, projectAccess, updateTaskController);
+router.post("/:projectId/tasks/:taskId/attachments", protectedRoute, projectAccess, uploadTaskAttachment.array("files", 10), uploadTaskAttachmentController);
+export default router;      

@@ -76,40 +76,7 @@ export const TaskDetailModal = ({ taskId, projectId, isOpen, onClose, canEdit = 
         }
     }, [isOpen, taskId, projectId]);
 
-    // 2. Handle Update
-    // const handleUpdate = async () => {
-    //     if (!taskId) return;
-    //     try {
-    //         const data = new FormData();
-    //         data.append("title", formData.title);
-    //         data.append("description", formData.description);
-    //         data.append("status", formData.status);
-    //         data.append("priority", formData.priority);
-
-    //         if (newFiles) {
-    //             for (let i = 0; i < newFiles.length; i++) {
-    //                 data.append("files", newFiles[i]);
-    //             }
-    //         }
-
-    //         // Gọi qua Service
-    //         // await taskService.updateTask(projectId, taskId, data);
-
-    //         toast.success("Cập nhật thành công");
-    //         setIsEditing(false);
-    //         setNewFiles(null);
-
-    //         // Refresh data local & global
-    //         const updatedData = await taskService.getTaskById(projectId, taskId);
-    //         setTask(updatedData);
-    //         fetchTasks(projectId);
-
-    //     } catch (error) {
-    //         console.error(error);
-    //         toast.error("Lỗi khi cập nhật");
-    //     }
-    // };
-
+    
     // 3. Handle Delete
     const handleDelete = async () => {
         if (!taskId) return;

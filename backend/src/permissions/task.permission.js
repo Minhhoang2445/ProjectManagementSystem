@@ -1,5 +1,10 @@
 export const UPDATE_TASK_PERMISSION = {
-    admin: ['*'],
-    project_leader: ['*'],
-    member: ['status']
+    ADMIN: ['*'],
+    LEADER: ['*'],
+    MEMBER: ['status']
+};
+export const UPLOAD_TASK_ATTACHMENT_PERMISSION = {
+    ADMIN: true,
+    LEADER: true,
+    MEMBER: true,
 };

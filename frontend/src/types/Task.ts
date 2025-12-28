@@ -19,9 +19,10 @@ export interface Task {
         email: string;
     };
 }
-export type CreateTaskFormData = Omit<Task, "id" | "createdAt" | "updatedAt" | "projectId"> & {
+export type CreateTaskFormData = Omit<Task, "id" | "createdAt" | "updatedAt" | "projectId" > & {
     
     assigneeId?: number;
+    files?: FileList;
 };
 import type { User } from "@/types/User";
 export interface ProjectMemberSummary {

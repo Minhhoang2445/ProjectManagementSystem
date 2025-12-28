@@ -33,21 +33,32 @@ export default function MyTasksPage() {
   };
 
   const { role, isLeader } = useMemo(() => {
-    if (!project || !user) return { role: null, isLeader: false };
+    if (!user) return { role: null, isLeader: false };
 
-    
-    const member = project.members?.find((m: any) => m.userId === user.id);
+    // 🛡 ADMIN hệ thống → toàn quyền
+    if (user.role === "admin") {
+      return {
+        role: "admin",
+        isLeader: true,
+      };
+    }
 
-    const role = member ? member.roleInProject : null;
+    if (!project) return { role: null, isLeader: false };
+
+    const member = project.members?.find(
+      (m: any) => m.userId === user.id
+    );
+
+    const roleInProject = member ? member.roleInProject : null;
+
     return {
-      role,
-      isLeader: role === "project_leader"
+      role: roleInProject,
+      isLeader: roleInProject === "project_leader",
     };
   }, [project, user]);
 
   const membersSummary = useMemo(() => {
     if (!project?.members) return [];
-
     return project.members.map((m: any) => ({
       userId: m.userId,
       // Fallback nếu API chưa trả về user
@@ -57,9 +68,7 @@ export default function MyTasksPage() {
   }, [project]);
   return (
     <div>
-      <div className="flex justify-between items-center p-4">
-        <h1 className="text-xl font-bold">My Spaces</h1>
-      </div>
+      
 
       {/* 4. Truyền xuống Outlet */}
       <Outlet context={{ project, user, role, isLeader, membersSummary }} />

@@ -10,7 +10,7 @@ import { TaskDetailModal } from "@/components/task/TaskDetailModal";
 import type { CreateTaskFormData, ProjectMemberSummary } from "@/types/Task";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-const COLUMNS = ["todo", "in_progress", "review", "done"] as const;
+const COLUMNS = ["todo", "in_progress", "review", "done", "cancelled"] as const;
 
 interface ProjectOutletContext {
     project: any;
@@ -33,6 +33,11 @@ export default function ProjectKanban() {
     const [isCreating, setIsCreating] = useState(false);
     const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+    const [search, setSearch] = useState("");
+    const [filterPriority, setFilterPriority] = useState<string>("all");
+    const [filterAssignee, setFilterAssignee] = useState<string>("all");
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
 
     useEffect(() => {
         if (projectId) {
@@ -59,16 +64,43 @@ export default function ProjectKanban() {
     };
 
     const groupedTasks = useMemo(() => {
+        const keyword = search.trim().toLowerCase();
+
         const groups: Record<string, Task[]> = {
-            todo: [], in_progress: [], review: [], done: [],
+            todo: [],
+            in_progress: [],
+            review: [],
+            done: [],
+            cancelled: [],
         };
+
         tasks.forEach((task) => {
-            const statusKey = task.status === 'to_do' ? 'todo' : task.status;
+            const matchSearch =
+                !keyword ||
+                task.title?.toLowerCase().includes(keyword) ||
+                task.description?.toLowerCase().includes(keyword);
+
+            if (!matchSearch) return;
+
+            if (filterPriority !== "all" && task.priority !== filterPriority) {
+                return;
+            }
+
+            if (
+                filterAssignee !== "all" &&
+                String(task.assignee?.id || "") !== filterAssignee
+            ) {
+                return;
+            }
+
+            const statusKey = task.status === "to_do" ? "todo" : task.status;
             if (groups[statusKey]) groups[statusKey].push(task);
-            else if (groups[task.status]) groups[task.status].push(task);
         });
+
         return groups;
-    }, [tasks]);
+    }, [tasks, search, filterPriority, filterAssignee]);
+
+
 
     const handleOpenCreateModal = (statusColumn: string) => {
         setModalDefaultStatus(statusColumn as Task["status"]);
@@ -98,29 +130,8 @@ export default function ProjectKanban() {
         }
     };
 
-    const onDragEnd = async (result: DropResult) => {
-        const { destination, source, draggableId } = result;
-        if (!destination) return;
-        if (destination.droppableId === source.droppableId && destination.index === source.index) return;
-
-        const taskId = Number(draggableId);
-        const newStatus = destination.droppableId as Task["status"];
-
-        const newTasks = tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t);
-        setTasks(newTasks);
-
-        try {
-            // Logic update status API
-        } catch (error) {
-            loadTasks(Number(projectId));
-        }
-    };
-
-    // --- HELPER STYLE ---
-
-    // Style Card (Nền + Border)
+   
     const getCardStyle = (priority: string, isDragging: boolean) => {
-        // Giảm border-l xuống 4px cho thanh thoát
         let baseStyle = "border-l-4 transition-all duration-200 ease-in-out cursor-pointer group relative select-none";
 
         if (isDragging) {
@@ -158,7 +169,58 @@ export default function ProjectKanban() {
         deadline.setHours(0, 0, 0, 0);
         return deadline < now && task.status !== 'done';
     };
+    const mapColumnToStatus = (column: string): Task["status"] => {
+        return column as Task["status"];
+    };
 
+    const onDragEnd = async (result: DropResult) => {
+        const { destination, source, draggableId } = result;
+
+        if (!destination) return;
+
+        if (
+            destination.droppableId === source.droppableId &&
+            destination.index === source.index
+        ) {
+            return;
+        }
+
+        if (!projectId) return;
+
+        const taskId = Number(draggableId);
+        const newStatus = mapColumnToStatus(destination.droppableId);
+
+        const previousTasks = [...tasks];
+
+        setTasks((prev) =>
+            prev.map((task) =>
+                task.id === taskId
+                    ? { ...task, status: newStatus }
+                    : task
+            )
+        );
+
+        try {
+            await taskService.updateTask(Number(projectId), taskId, {
+                status: newStatus,
+            });
+        } catch (error) {
+            console.error("Update status failed", error);
+            setTasks(previousTasks);
+            toast.error("Không thể cập nhật trạng thái công việc");
+        }
+    };
+    const assigneeOptions = useMemo(() => {
+        const map = new Map<number, any>();
+
+        tasks.forEach(task => {
+            if (task.assignee) {
+                map.set(task.assignee.id, task.assignee);
+            }
+        });
+
+        return Array.from(map.values());
+    }, [tasks]);
     if (loading) return <div className="p-10 text-center text-gray-500 text-sm">Đang tải danh sách công việc...</div>;
 
     return (
@@ -168,6 +230,7 @@ export default function ProjectKanban() {
                 onClose={() => setIsModalOpen(false)}
                 onCreate={handleCreateTask}
                 projectId={Number(projectId)}
+                taskId={selectedTaskId}
                 defaultStatus={modalDefaultStatus}
                 members={membersSummary || []}
                 isSubmitting={isCreating}
@@ -186,8 +249,94 @@ export default function ProjectKanban() {
                     canEdit={isLeader}
                 />
             )}
+            {/* 🔍 SEARCH + FILTER */}
+            <div className="grid grid-cols-1 mt-1 md:grid-cols-4 gap-6 min-w-[1000px] w-[1500px] md:min-w-0 px-2 mb-3">
+                <div className="flex gap-2 relative">
+                    {/* Search */}
+                    <input
+                        type="text"
+                        placeholder="Search task..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="flex-1 text-sm px-3 py-2 border border-gray-300 rounded-sm
+                focus:outline-none focus:ring-2 focus:ring-blue-400
+                placeholder:text-gray-400 bg-white shadow-sm"
+                    />
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 min-w-[1000px] md:min-w-0 px-2">
+                    {/* Filter button */}
+                    <button
+                        onClick={() => setIsFilterOpen((prev) => !prev)}
+                        className="px-3 py-2 border border-gray-300 rounded-sm bg-white text-sm
+                hover:bg-gray-50 flex items-center gap-1 shadow-sm"
+                    >
+                        Filter
+                    </button>
+
+                    {/* Dropdown */}
+                    {isFilterOpen && (
+                        <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-gray-200 rounded-md shadow-lg z-20 p-3 space-y-3">
+                            {/* Priority */}
+                            <div>
+                                <label className="text-xs font-semibold text-gray-600">
+                                    Priority
+                                </label>
+                                <select
+                                    value={filterPriority}
+                                    onChange={(e) => setFilterPriority(e.target.value)}
+                                    className="mt-1 w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                >
+                                    <option value="all">All</option>
+                                    <option value="urgent">Urgent</option>
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </div>
+
+                            {/* Assignee */}
+                            <div>
+                                <label className="text-xs font-semibold text-gray-600">
+                                    Assignee
+                                </label>
+                                <select
+                                    value={filterAssignee}
+                                    onChange={(e) => setFilterAssignee(e.target.value)}
+                                    className="mt-1 w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                >
+                                    <option value="all">All assignees</option>
+                                    {assigneeOptions.map(a => (
+                                        <option key={a.id} value={String(a.id)}>
+                                            {a.firstName} {a.lastName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex justify-end gap-2 pt-2 border-t">
+                                <button
+                                    onClick={() => {
+                                        setFilterPriority("all");
+                                        setFilterAssignee("all");
+                                    }}
+                                    className="text-xs text-gray-500 hover:text-gray-700"
+                                >
+                                    Reset
+                                </button>
+                                <button
+                                    onClick={() => setIsFilterOpen(false)}
+                                    className="text-xs text-blue-600 font-semibold"
+                                >
+                                    Apply
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+
+            <div className="flex gap-6 px-2 min-w-max">
                 <DragDropContext onDragEnd={onDragEnd}>
                     {COLUMNS.map((col) => (
                         <Droppable key={col} droppableId={col}>
@@ -195,7 +344,7 @@ export default function ProjectKanban() {
                                 <div
                                     ref={provided.innerRef}
                                     {...provided.droppableProps}
-                                    className={`flex flex-col rounded-xl bg-gray-50/80 border border-gray-200 shadow-sm h-full max-h-[calc(100vh-180px)] transition-colors
+                                    className={`flex flex-col rounded-xl bg-gray-50/80 border border-gray-200 shadow-sm h-full max-h-[calc(100vh-180px)] min-w-[280px] w-[350px] transition-colors
                                         ${snapshot.isDraggingOver ? "bg-blue-50/50 border-blue-200 ring-2 ring-blue-100" : ""}
                                     `}
                                 >

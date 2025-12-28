@@ -1,21 +1,53 @@
 import { useEffect, useState } from "react";
-import { adminService } from "../../services/adminService.ts";
+import { adminService } from "../../services/adminService";
 import type { User } from "../../types/User";
-// import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
+
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-} from "@/components/auth/dropdown-menu.tsx";
+} from "@/components/auth/dropdown-menu";
 import { Button } from "@/components/auth/button";
-import { Check, MoreHorizontal } from "lucide-react";
+import {
+  Check,
+  MoreHorizontal,
+  ArrowUp,
+  ArrowDown,
+  Filter,
+} from "lucide-react";
 
-export default function UsersPage() {
+/* ================= COMPONENT ================= */
+
+export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+
+  /* ===== SORT ===== */
+  const [sortBy, setSortBy] = useState<string | undefined>();
+  const [order, setOrder] = useState<"asc" | "desc">("asc");
+
+  /* ===== FILTER (áp dụng thật) ===== */
+  const [filters, setFilters] = useState<{
+    status?: string;
+    department?: string;
+  }>({});
+
+  /* ===== FILTER (nháp trong UI) ===== */
+  const [draftFilters, setDraftFilters] = useState<{
+    status?: string;
+    department?: string;
+  }>({});
+
+  /* ===== PAGINATION ===== */
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const [total, setTotal] = useState(0);
+
+  /* ================= HELPERS ================= */
+
   const statusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -29,16 +61,25 @@ export default function UsersPage() {
     }
   };
 
-  // fetch user list
+  /* ================= API ================= */
+
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const data = await adminService.getAllUsers();
 
-      // đảm bảo data là array
-      setUsers(Array.isArray(data) ? data : []);
+      const res = await adminService.getAllUsers({
+        sort: sortBy,
+        order,
+        status: filters.status,
+        department: filters.department,
+        page,
+        limit,
+      });
+
+      setUsers(res.data);
+      setTotal(res.total);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Failed to load users");
       setUsers([]);
     } finally {
@@ -48,41 +89,181 @@ export default function UsersPage() {
 
   useEffect(() => {
     loadUsers();
-  }, []);
+  }, [sortBy, order, filters, page]);
 
-  
+  /* ================= HANDLERS ================= */
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(field);
+      setOrder("asc");
+    }
+    setPage(1);
+  };
+
+  const totalPages = Math.ceil(total / limit);
+
+  /* ================= UI ================= */
 
   return (
     <div className="space-y-4 p-4">
       <h1 className="text-2xl font-semibold">Users Management</h1>
 
-      <div className="border rounded-lg bg-card shadow-sm h-full overflow-y-auto">
+      {/* ===== FILTER BAR ===== */}
+      <div className="flex justify-end items-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="flex gap-2">
+              <Filter size={16} />
+              Filter
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent className="w-64 p-4 space-y-4">
+            <DropdownMenuLabel>Filter Users</DropdownMenuLabel>
+
+            {/* STATUS */}
+            <div>
+              <label className="text-xs font-medium">Status</label>
+              <select
+                className="w-full mt-1 border rounded px-2 py-1 text-sm"
+                value={draftFilters.status ?? ""}
+                onChange={(e) =>
+                  setDraftFilters((prev) => ({
+                    ...prev,
+                    status: e.target.value || undefined,
+                  }))
+                }
+              >
+                <option value="">All</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="suspended">Suspended</option>
+              </select>
+            </div>
+
+            {/* DEPARTMENT */}
+            <div>
+              <label className="text-xs font-medium">Department</label>
+              <select
+                className="w-full mt-1 border rounded px-2 py-1 text-sm"
+                value={draftFilters.department ?? ""}
+                onChange={(e) =>
+                  setDraftFilters((prev) => ({
+                    ...prev,
+                    department: e.target.value || undefined,
+                  }))
+                }
+              >
+                <option value="">All</option>
+                <option value="HR">HR</option>
+                <option value="IT">IT</option>
+                <option value="Finance">Finance</option>
+                <option value="Marketing">Marketing</option>
+              </select>
+            </div>
+
+            {/* ACTIONS */}
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setDraftFilters({});
+                  setFilters({});
+                  setPage(1);
+                }}
+              >
+                Clear
+              </Button>
+
+              <Button
+                size="sm"
+                onClick={() => {
+                  setFilters(draftFilters);
+                  setPage(1);
+                }}
+              >
+                Apply
+              </Button>
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        
+      </div>
+
+      {/* ===== TABLE ===== */}
+      <div className="border rounded-lg bg-card shadow-sm overflow-x-auto">
         <table className="w-full border-collapse">
           <thead className="bg-muted/50">
             <tr className="text-left text-sm text-foreground/70">
-              <th className="p-3 border-b">Name</th>
-              <th className="p-3 border-b">Email</th>
+              <th
+                className="p-3 border-b cursor-pointer"
+                onClick={() => handleSort("firstName")}
+              >
+                Name{" "}
+                {sortBy === "firstName" &&
+                  (order === "asc" ? (
+                    <ArrowUp size={14} />
+                  ) : (
+                    <ArrowDown size={14} />
+                  ))}
+              </th>
+              <th
+                className="p-3 border-b cursor-pointer"
+                onClick={() => handleSort("email")}
+              >
+                Email{" "}
+                {sortBy === "email" &&
+                  (order === "asc" ? (
+                    <ArrowUp size={14} />
+                  ) : (
+                    <ArrowDown size={14} />
+                  ))}
+              </th>
               <th className="p-3 border-b">Department</th>
               <th className="p-3 border-b">Designation</th>
-              <th className="p-3 border-b">Role</th>
-              <th className="p-3 border-b">Status</th>
-              <th className="p-3 border-b w-20">Actions</th>
+              <th
+                className="p-3 border-b cursor-pointer"
+                onClick={() => handleSort("role")}
+              >
+                Role{" "}
+                {sortBy === "role" &&
+                  (order === "asc" ? (
+                    <ArrowUp size={14} />
+                  ) : (
+                    <ArrowDown size={14} />
+                  ))}
+              </th>
+              <th
+                className="p-3 border-b cursor-pointer"
+                onClick={() => handleSort("status")}
+              >
+                Status{" "}
+                {sortBy === "status" &&
+                  (order === "asc" ? (
+                    <ArrowUp size={14} />
+                  ) : (
+                    <ArrowDown size={14} />
+                  ))}
+              </th>
+              <th className="p-3 border-b w-20 text-right">Actions</th>
             </tr>
           </thead>
 
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={8} className="p-5 text-center">
+                <td colSpan={7} className="p-5 text-center">
                   Loading...
                 </td>
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td
-                  colSpan={8}
-                  className="p-5 text-center text-muted-foreground"
-                >
+                <td colSpan={7} className="p-5 text-center text-muted-foreground">
                   No users found.
                 </td>
               </tr>
@@ -92,25 +273,13 @@ export default function UsersPage() {
                   key={user.id}
                   className="text-sm hover:bg-muted/40 transition-colors"
                 >
-
-                  {/* FULL NAME */}
                   <td className="p-3 border-b">
                     {user.firstName} {user.lastName}
                   </td>
-
-                  {/* EMAIL */}
                   <td className="p-3 border-b">{user.email}</td>
-
-                  {/* DEPARTMENT */}
                   <td className="p-3 border-b">{user.department}</td>
-
-                  {/* DESIGNATION */}
                   <td className="p-3 border-b">{user.designation}</td>
-
-                  {/* ROLE */}
                   <td className="p-3 border-b capitalize">{user.role}</td>
-
-                  {/* STATUS */}
                   <td className="p-3 border-b">
                     <span
                       className={`capitalize px-2 py-1 rounded-md text-xs font-medium border ${statusColor(
@@ -129,7 +298,9 @@ export default function UsersPage() {
                       </DropdownMenuTrigger>
 
                       <DropdownMenuContent className="w-40">
-                        <DropdownMenuLabel>Update Status</DropdownMenuLabel>
+                        <DropdownMenuLabel>
+                          Update Status
+                        </DropdownMenuLabel>
 
                         {["active", "pending", "suspended"].map(
                           (statusOption) => (
@@ -142,11 +313,13 @@ export default function UsersPage() {
                                     user.id,
                                     statusOption
                                   );
-                                  toast.success(`User set to ${statusOption}`);
+                                  toast.success(
+                                    `User set to ${statusOption}`
+                                  );
                                   loadUsers();
                                 } catch (err) {
                                   toast.error("Failed to update");
-                                  console.log(err);
+                                  console.error(err);
                                 }
                               }}
                             >
@@ -165,6 +338,31 @@ export default function UsersPage() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* ===== PAGINATION ===== */}
+      <div className="flex justify-end items-center gap-3">
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={page === 1}
+          onClick={() => setPage((p) => p - 1)}
+        >
+          Prev
+        </Button>
+
+        <span className="text-sm">
+          Page {page} / {totalPages || 1}
+        </span>
+
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={page >= totalPages}
+          onClick={() => setPage((p) => p + 1)}
+        >
+          Next
+        </Button>
       </div>
     </div>
   );

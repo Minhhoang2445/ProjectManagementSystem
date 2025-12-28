@@ -36,9 +36,11 @@ export interface taskState {
     selectedTask: Task | null ;
     isLoading: boolean;
     fetchTasks: () => Promise<void>;
-    fetchTaskById: (id: number) => Promise<void>;
+    fetchTaskById: (projectId: number, id: number) => Promise<void>;
     getTasksByProjectId: (projectId: number) => Promise<void>;
     getUserTasks: () => Promise<void>;
     createTask: (id: number, data: any) => Promise<void>;
     deleteTask: (projectId: number, taskId: number) => Promise<void>;
+    updateTask: (projectId: number, taskId: number, data: any) => Promise<void>;
+    uploadTaskAttachments: (projectId: number, taskId: number, files: FileList) => Promise<void>;
 }

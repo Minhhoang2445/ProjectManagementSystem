@@ -26,5 +26,16 @@ export const taskService = {
     deleteTask: async (projectId: number, taskId: number) => {
         const res = await api.delete(`/project/${projectId}/tasks/${taskId}`);
         return res.data;
+    },
+    updateTask: async (projectId: number, taskId: number, data: any) => {
+        const res = await api.patch(`/project/${projectId}/tasks/${taskId}`, data);
+        return res.data;
+    },
+    uploadTaskAttachments: async (projectId: number,taskId: number,formData: FormData) => {
+        const res = await api.post(
+            `/project/${projectId}/tasks/${taskId}/attachments`,
+            formData
+        );
+        return res.data;
     }
 };

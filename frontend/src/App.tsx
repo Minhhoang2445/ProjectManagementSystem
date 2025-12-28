@@ -52,7 +52,7 @@ function App() {
                     <Route index element={<Navigate to="overview" replace />} />
 
                     <Route path="overview" element={<ProjectOverview />} />
-
+                    <Route path="tasks" element={<ProjectKanban />} />
                     {/* CÁC TAB KHÁC */}
                     {/* <Route path="tasks" element={<ProjectKanban />} />
                     <Route path="members" element={<ProjectMembers />} /> */}

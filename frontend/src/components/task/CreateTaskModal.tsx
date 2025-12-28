@@ -1,192 +1,246 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { X, Loader2 } from "lucide-react";
-import type { Task, CreateTaskFormData, ProjectMemberSummary } from "@/types/Task";
+import { X, Loader2, Paperclip } from "lucide-react";
+import type {
+  Task,
+  CreateTaskFormData,
+  ProjectMemberSummary,
+} from "@/types/Task";
 
 interface CreateTaskModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onCreate: (data: CreateTaskFormData) => Promise<void>;
-    projectId: number;
-    defaultStatus: Task["status"];
-    members: ProjectMemberSummary[];
-    isSubmitting: boolean;
+  isOpen: boolean;
+  onClose: () => void;
+  onCreate: (data: CreateTaskFormData | FormData) => Promise<void>;
+  projectId: number;
+  taskId?: number | null;
+  defaultStatus: Task["status"];
+  members: ProjectMemberSummary[];
+  isSubmitting: boolean;
 }
 
 export default function CreateTaskModal({
-    isOpen,
-    onClose,
-    onCreate,
-    defaultStatus,
-    members,
-    isSubmitting,
+  isOpen,
+  onClose,
+  onCreate,
+  defaultStatus,
+  members,
+  isSubmitting,
+  projectId,    
 }: CreateTaskModalProps) {
-    const {
-        register,
-        handleSubmit,
-        reset,
-        formState: { errors },
-    } = useForm<CreateTaskFormData>({
-        defaultValues: {
-            title: "",
-            description: "",
-            status: defaultStatus,
-            priority: "medium",
-            // assigneeId để undefined hoặc null ban đầu
-            assigneeId: undefined,
-        },
-    });
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CreateTaskFormData>({
+    defaultValues: {
+      title: "",
+      description: "",
+      status: defaultStatus,
+      priority: "medium",
+      assigneeId: undefined,
+    },
+  });
 
-    useEffect(() => {
-        if (isOpen) {
-            reset({
-                title: "",
-                description: "",
-                status: defaultStatus,
-                priority: "medium",
-                assigneeId: undefined,
-                dueDate: "",
-            });
-        }
-    }, [isOpen, defaultStatus, reset]);
+  const [files, setFiles] = useState<File[]>([]);
 
-    const onSubmit = (data: CreateTaskFormData) => {
-        let formattedDate = undefined;
-        if (data.dueDate) {
-            const dateObj = new Date(data.dueDate);
-            formattedDate = dateObj.toISOString();
-        }
+  useEffect(() => {
+    if (isOpen) {
+      reset({
+        title: "",
+        description: "",
+        status: defaultStatus,
+        priority: "medium",
+        assigneeId: undefined,
+        dueDate: "",
+      });
+      setFiles([]);
+    }
+  }, [isOpen, defaultStatus, reset]);
 
-        const formattedData: CreateTaskFormData = {
-            ...data,
-            assigneeId: (data.assigneeId && !isNaN(Number(data.assigneeId)))
-                ? Number(data.assigneeId)
-                : undefined,
-            dueDate: formattedDate,
-        };
+  const onSubmit = async (data: CreateTaskFormData) => {
+    let formattedDate = undefined;
+    if (data.dueDate) {
+      formattedDate = new Date(data.dueDate).toISOString();
+    }
 
-        onCreate(formattedData);
+    // 1. Validate & Parse assigneeId manually
+    const rawAssigneeId = data.assigneeId;
+
+    const payload = {
+      ...data,
+      projectId, // Explicitly include projectId
+      dueDate: formattedDate,
+        assigneeId: (data.assigneeId && !isNaN(Number(data.assigneeId)))
+            ? Number(data.assigneeId)
+            : undefined,
     };
 
-    if (!isOpen) return null;
+    // 👉 Nếu có file → dùng FormData
+    if (files.length > 0) {
+      const formData = new FormData();
 
-    const inputClass = "mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm";
-    const labelClass = "block text-sm font-medium text-gray-700";
-    console.log(members);
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl md:max-w-lg">
+      // Append projectId manually to ensure it is present
+      formData.append("projectId", String(projectId));
 
-                <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-                    <h2 className="text-lg font-bold text-gray-800">Create New Task</h2>
-                    <button onClick={onClose} className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
-                        <X size={20} />
-                    </button>
-                </div>
+      Object.entries(payload).forEach(([key, value]) => {
+        // projectId already added manually
+        if (key !== "projectId" && value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
 
-                <form onSubmit={handleSubmit(onSubmit)} className="p-6">
-                    <div className="space-y-4">
-                        <div>
-                            <label htmlFor="title" className={labelClass}>
-                                Title <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                id="title"
-                                type="text"
-                                {...register("title", { required: "Title is required" })}
-                                className={inputClass}
-                                placeholder="e.g., Fix navigation bug"
-                            />
-                            {errors.title && (
-                                <p className="mt-1 text-xs text-red-500">{errors.title.message}</p>
-                            )}
-                        </div>
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
 
-                        <div>
-                            <label htmlFor="description" className={labelClass}>Description</label>
-                            <textarea
-                                id="description"
-                                rows={3}
-                                {...register("description")}
-                                className={inputClass}
-                                placeholder="Add more details..."
-                            />
-                        </div>
+      await onCreate(formData);
+    } else {
+      await onCreate(payload);
+    }
+  };
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label htmlFor="status" className={labelClass}>Status</label>
-                                <select id="status" {...register("status")} className={inputClass}>
-                                    <option value="todo">To Do</option>
-                                    <option value="in_progress">In Progress</option>
-                                    <option value="review">Review</option>
-                                    <option value="done">Done</option>
-                                </select>
-                            </div>
+  if (!isOpen) return null;
 
-                            <div>
-                                <label htmlFor="priority" className={labelClass}>Priority</label>
-                                <select id="priority" {...register("priority")} className={inputClass}>
-                                    <option value="low">Low</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="high">High</option>
-                                    <option value="urgent">Urgent</option>
-                                </select>
-                            </div>
-                        </div>
+  const inputClass =
+    "mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm";
+  const labelClass = "block text-sm font-medium text-gray-700";
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label htmlFor="assigneeId" className={labelClass}>Assignee</label>
-                                <select
-                                    id="assigneeId"
-                                    {...register("assigneeId", {
-                                        valueAsNumber: true
-                                    })}
-                                    className={inputClass}
-                                >
-                                    <option value="">Unassigned</option>
-                                    {members.map((member) => (
-                                        <option key={member.userId} value={member.userId}>
-                                            {member.firstName} {member.lastName}
-
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label htmlFor="dueDate" className={labelClass}>Due Date</label>
-                                <input
-                                    id="dueDate"
-                                    type="date"
-                                    {...register("dueDate")}
-                                    className={inputClass}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mt-6 flex justify-end gap-3">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                            disabled={isSubmitting}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70"
-                        >
-                            {isSubmitting && <Loader2 size={16} className="mr-2 animate-spin" />}
-                            Create Task
-                        </button>
-                    </div>
-                </form>
-            </div>
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-xl bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b px-6 py-4">
+          <h2 className="text-lg font-bold">Create New Task</h2>
+          <button onClick={onClose}>
+            <X size={20} />
+          </button>
         </div>
-    );
+
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+          <div>
+            <label className={labelClass}>Title *</label>
+            <input
+              {...register("title", { required: "Title is required" })}
+              className={inputClass}
+            />
+            {errors.title && (
+              <p className="text-xs text-red-500">{errors.title.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className={labelClass}>Description</label>
+            <textarea
+              {...register("description")}
+              rows={3}
+              className={inputClass}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Status</label>
+              <select {...register("status")} className={inputClass}>
+                <option value="todo">To Do</option>
+                <option value="in_progress">In Progress</option>
+                <option value="review">Review</option>
+                <option value="done">Done</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div>
+              <label className={labelClass}>Priority</label>
+              <select {...register("priority")} className={inputClass}>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Assignee *</label>
+              <select
+                {...register("assigneeId", {
+                  required: "Please select an assignee",
+                    valueAsNumber: true
+                })}
+                className={inputClass}
+              >
+                <option value="">-- Select --</option>
+                {members.map((m) => (
+                  <option key={m.userId} value={m.userId}>
+                    {m.firstName} {m.lastName}
+                  </option>
+                ))}
+              </select>
+              {errors.assigneeId && (
+                <p className="text-xs text-red-500">
+                  {errors.assigneeId.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className={labelClass}>Due Date</label>
+              <input
+                type="date"
+                {...register("dueDate")}
+                className={inputClass}
+              />
+            </div>
+          </div>
+
+          {/* 🔥 Upload File */}
+          <div>
+            <label className={labelClass}>Attachments</label>
+            <label className="mt-1 flex cursor-pointer items-center gap-2 rounded-md border border-dashed px-3 py-2 text-sm text-gray-600 hover:bg-gray-50">
+              <Paperclip size={16} />
+              Select files
+              <input
+                type="file"
+                multiple
+                hidden
+                onChange={(e) => {
+                  if (e.target.files) {
+                    setFiles(Array.from(e.target.files));
+                  }
+                }}
+              />
+            </label>
+
+            {files.length > 0 && (
+              <ul className="mt-2 text-xs text-gray-600 list-disc list-inside">
+                {files.map((f, i) => (
+                  <li key={i}>{f.name}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="px-4 py-2 text-sm border rounded-md"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md"
+            >
+              {isSubmitting && <Loader2 size={16} className="animate-spin" />}
+              Create
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }
