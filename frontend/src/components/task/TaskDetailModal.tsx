@@ -33,21 +33,29 @@ interface TaskDetailModalProps {
     onClose: () => void;
     canEdit?: boolean;
 }
-
+interface TaskUpdateForm {
+    title: string;
+    description: string;
+    status: string;
+    priority: string;
+    assigneeId?: string; // string vì FormData
+    dueDate?: string;    // yyyy-MM-dd
+}
 export const TaskDetailModal = ({ taskId, projectId, isOpen, onClose, canEdit = false }: TaskDetailModalProps) => {
     const [task, setTask] = useState<Task | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<TaskUpdateForm>({
         title: "",
         description: "",
         status: "",
         priority: "",
+        assigneeId: "",
+        dueDate: "",
     });
     const [newFiles, setNewFiles] = useState<FileList | null>(null);
 
-    // Lấy hàm refresh từ store (nếu bạn dùng store để quản lý list task)
     const { fetchTasks } = useTaskStore();
 
     // 1. Fetch Data
@@ -64,6 +72,8 @@ export const TaskDetailModal = ({ taskId, projectId, isOpen, onClose, canEdit = 
                         description: data.description || "",
                         status: data.status,
                         priority: data.priority,
+                        assigneeId: data.assignee?.id?.toString() || "",
+                        dueDate: data.dueDate ? data.dueDate.slice(0, 10) : "",
                     });
                 } catch (error) {
                     toast.error("Không thể tải chi tiết công việc");
@@ -90,6 +100,62 @@ export const TaskDetailModal = ({ taskId, projectId, isOpen, onClose, canEdit = 
             onClose();
         } catch (error) {
             toast.error("Không thể xóa (Có thể do phân quyền)");
+        }
+    };
+    const handleUpdate = async () => {
+        if (!taskId) return;
+
+        try {
+            const formattedDueDate = formData.dueDate
+                ? new Date(formData.dueDate).toISOString()
+                : undefined;
+            const numericAssigneeId = formData.assigneeId && !isNaN(Number(formData.assigneeId))
+                ? Number(formData.assigneeId)
+                : undefined;
+
+            const basePayload = {
+                title: formData.title,
+                description: formData.description,
+                status: formData.status,
+                priority: formData.priority,
+                dueDate: formattedDueDate,
+                assigneeId: numericAssigneeId,
+            };
+
+            const sanitizedPayload: Record<string, string | number> = Object.fromEntries(
+                Object.entries(basePayload)
+                    .filter(([, value]) => value !== undefined && value !== null)
+                    .map(([key, value]) => [key, value as string | number])
+            );
+
+            const hasNewFiles = Boolean(newFiles && newFiles.length);
+
+            if (hasNewFiles && newFiles) {
+                const formPayload = new FormData();
+                formPayload.append("projectId", String(projectId));
+
+                Object.entries(sanitizedPayload).forEach(([key, value]) => {
+                    formPayload.append(key, String(value));
+                });
+
+                Array.from(newFiles).forEach((file) => {
+                    formPayload.append("files", file);
+                });
+
+                await taskService.updateTask(projectId, taskId, formPayload);
+            } else {
+                await taskService.updateTask(projectId, taskId, sanitizedPayload);
+            }
+
+            toast.success("Đã cập nhật công việc");
+            
+            setIsEditing(false);
+            setNewFiles(null);
+            onClose();
+        } catch (error: any) {
+            console.error("Update Error:", error);
+            const msg = error?.response?.data?.message || "Không thể cập nhật công việc";
+            toast.error(msg);
         }
     };
 
@@ -128,13 +194,13 @@ export const TaskDetailModal = ({ taskId, projectId, isOpen, onClose, canEdit = 
                 </DialogHeader>
 
                 {isLoading ? (
-                    <div className="py-12 flex justify-center text-sm text-muted-foreground">Đang tải thông tin...</div>
+                    <div className="py-12 flex justify-center text-sm text-muted-foreground">Loading information...</div>
                 ) : task ? (
                     <div className="space-y-6">
                         {/* Status & Priority */}
                         <div className="grid grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <Label className="text-xs font-medium text-muted-foreground uppercase">Trạng thái</Label>
+                                <Label className="text-xs font-medium text-muted-foreground uppercase">Status</Label>
                                 {isEditing ? (
                                     <Select
                                         value={formData.status}
@@ -161,7 +227,7 @@ export const TaskDetailModal = ({ taskId, projectId, isOpen, onClose, canEdit = 
                             </div>
 
                             <div className="space-y-2">
-                                <Label className="text-xs font-medium text-muted-foreground uppercase">Độ ưu tiên</Label>
+                                <Label className="text-xs font-medium text-muted-foreground uppercase">Priority</Label>
                                 {isEditing ? (
                                     <Select
                                         value={formData.priority}
@@ -191,7 +257,7 @@ export const TaskDetailModal = ({ taskId, projectId, isOpen, onClose, canEdit = 
 
                         {/* Description */}
                         <div className="space-y-2">
-                            <Label className="font-semibold text-sm">Mô tả</Label>
+                            <Label className="font-semibold text-sm">Description</Label>
                             {isEditing ? (
                                 <Textarea
                                     className="min-h-[120px] resize-none"
@@ -201,7 +267,7 @@ export const TaskDetailModal = ({ taskId, projectId, isOpen, onClose, canEdit = 
                                 />
                             ) : (
                                 <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-slate-50 p-4 rounded-md border border-slate-100">
-                                    {task.description || <span className="text-muted-foreground italic">Không có mô tả</span>}
+                                    {task.description || <span className="text-muted-foreground italic">No description</span>}
                                 </div>
                             )}
                         </div>
@@ -209,7 +275,7 @@ export const TaskDetailModal = ({ taskId, projectId, isOpen, onClose, canEdit = 
                         {/* Attachments */}
                         <div className="space-y-3">
                             <Label className="font-semibold text-sm flex items-center gap-2">
-                                <Paperclip className="w-4 h-4" /> Tài liệu đính kèm
+                                <Paperclip className="w-4 h-4" /> Attachments
                             </Label>
 
                             <div className="grid gap-2">
@@ -238,7 +304,7 @@ export const TaskDetailModal = ({ taskId, projectId, isOpen, onClose, canEdit = 
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-sm text-muted-foreground italic">Chưa có tài liệu đính kèm.</p>
+                                    <p className="text-sm text-muted-foreground italic">No attachments.</p>
                                 )}
                             </div>
 
@@ -251,7 +317,7 @@ export const TaskDetailModal = ({ taskId, projectId, isOpen, onClose, canEdit = 
                                         className="cursor-pointer file:text-blue-600 file:font-semibold"
                                     />
                                     <p className="text-[11px] text-muted-foreground mt-1.5 px-1">
-                                        * Upload thêm file sẽ không xóa file cũ.
+                                        * Uploading new files will not delete old files.
                                     </p>
                                 </div>
                             )}
@@ -261,10 +327,10 @@ export const TaskDetailModal = ({ taskId, projectId, isOpen, onClose, canEdit = 
                         <div className="flex justify-end gap-3 pt-6 border-t mt-4">
                             {isEditing ? (
                                 <>
-                                    <Button variant="outline" onClick={() => setIsEditing(false)}>Hủy bỏ</Button>
-                                    <Button // onClick={handleUpdate} 
+                                    <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+                                    <Button  onClick={handleUpdate} 
                                      className="bg-blue-600 hover:bg-blue-700 text-white">
-                                        <Save className="w-4 h-4 mr-2" /> Lưu thay đổi
+                                        <Save className="w-4 h-4 mr-2" /> Save Changes
                                     </Button>
                                 </>
                             ) : (

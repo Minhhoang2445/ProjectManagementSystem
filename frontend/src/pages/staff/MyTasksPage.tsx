@@ -4,6 +4,7 @@ import { projectService } from "@/services/projectService";
 import { useAuthStore } from "@/store/useAuthStore"; // Import store
 import type { User } from "@/types/User";
 import type { Project } from "@/types/Project";
+import TaskNavbar from "@/components/task/TaskNavbar";
 export default function MyTasksPage() {
   const { projectId } = useParams();
   const [project, setProject] = useState<Project | null>(null);
@@ -68,7 +69,7 @@ export default function MyTasksPage() {
   }, [project]);
   return (
     <div>
-      
+      <TaskNavbar />
 
       {/* 4. Truyền xuống Outlet */}
       <Outlet context={{ project, user, role, isLeader, membersSummary }} />

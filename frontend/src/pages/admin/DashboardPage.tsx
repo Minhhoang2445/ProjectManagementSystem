@@ -58,11 +58,14 @@ const recentActivities = [
 ];
 import { useEffect, useState } from "react";
 import { getSystemStats, type SystemStats } from "@/services/adminService";
-
+import { useNavigate } from "react-router";
 export default function DashboardPage() {
   const [stats, setStats] = useState<SystemStats | null>(null);
   const [loading, setLoading] = useState(true);
-
+  const navigate = useNavigate();
+  const handleCreateProject = () => {
+    navigate("/admin/projects/create")
+  };
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -152,7 +155,7 @@ export default function DashboardPage() {
       completed: dayTasks?.filter((t) => t.status === "done").length || 0,
     };
   });
-
+  
   return (
     <div className="flex flex-col gap-6 p-6">
       <div className="flex items-center justify-between">
@@ -162,7 +165,7 @@ export default function DashboardPage() {
             Overview of your projects and team performance.
           </p>
         </div>
-        <button className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2">
+        <button onClick={handleCreateProject} className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2">
           <Plus className="mr-2 h-4 w-4" /> New Project
         </button>
       </div>

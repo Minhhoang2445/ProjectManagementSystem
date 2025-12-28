@@ -119,25 +119,75 @@ export const updateTaskController = async (req, res) => {
     try {
         const taskId = Number(req.params.taskId);
         const projectId = req.projectId;
-        const updateData = req.body;
         const user = req.user;
+        const files = req.files;
 
         if (!taskId) {
             return res.status(400).json({ message: "Invalid task id" });
         }
 
-        const updatedTask = await updateTaskService({
-            taskId,
-            projectId,
-            updateData,
-            user,
+        const normalizeValue = (value) => Array.isArray(value) ? value[0] : value;
+        const updateData = { ...req.body };
+
+        Object.keys(updateData).forEach((key) => {
+            updateData[key] = normalizeValue(updateData[key]);
         });
 
-        if (!updatedTask) {
-            return res.status(404).json({ message: "Task not found" });
+        if (updateData.assigneeId !== undefined) {
+            const parsedAssignee = Number(updateData.assigneeId);
+            updateData.assigneeId = Number.isNaN(parsedAssignee) ? undefined : parsedAssignee;
         }
 
-        res.status(200).json(updatedTask);
+        if (updateData.dueDate) {
+            const parsedDate = new Date(updateData.dueDate);
+            updateData.dueDate = Number.isNaN(parsedDate.getTime()) ? undefined : parsedDate.toISOString();
+        }
+
+        delete updateData.projectId;
+
+        Object.keys(updateData).forEach((key) => {
+            if (updateData[key] === "" || updateData[key] === undefined) {
+                delete updateData[key];
+            }
+        });
+
+        const hasUpdateFields = Object.keys(updateData).length > 0;
+        const hasNewFiles = files && files.length > 0;
+
+        if (!hasUpdateFields && !hasNewFiles) {
+            return res.status(400).json({ message: "No fields provided to update" });
+        }
+
+        let updatedTask = null;
+
+        if (hasUpdateFields) {
+            updatedTask = await updateTaskService({
+                taskId,
+                projectId,
+                updateData,
+                user,
+            });
+
+            if (!updatedTask) {
+                return res.status(404).json({ message: "Task not found" });
+            }
+        }
+
+        if (hasNewFiles) {
+            await uploadTaskAttachmentService({
+                taskId,
+                projectId,
+                user,
+                files,
+            });
+        }
+
+        const fullTask = await getTaskByIdService({
+            taskId,
+            projectId,
+        });
+
+        res.status(200).json(fullTask || updatedTask);
     } catch (error) {
         console.error("CONTROLLER ERROR:", error);
         res.status(500).json({ message: "Failed to update task" });

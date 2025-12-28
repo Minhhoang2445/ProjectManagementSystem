@@ -1,4 +1,5 @@
 import { Link, useParams, useLocation } from "react-router";
+import { ThemeProvider } from "../theme-provider";
 
 export default function ProjectNavBar() {
     const { projectId } = useParams<{ projectId: string }>();

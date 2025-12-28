@@ -25,6 +25,6 @@ router.get("/:projectId/tasks", protectedRoute, projectAccess, getTasksByProject
 router.get("/:projectId/tasks/:taskId", protectedRoute, projectAccess, canSeeTask, getTaskByIdController);
 router.get("/user/me/tasks", protectedRoute, getUserTasksController);
 router.delete("/:projectId/tasks/:taskId", protectedRoute, projectAccess, canCreateAndDeleteTask, deleteTaskController);
-router.patch("/:projectId/tasks/:taskId", protectedRoute, projectAccess, updateTaskController);
+router.patch("/:projectId/tasks/:taskId", protectedRoute, projectAccess, uploadTaskAttachment.array("files", 10), updateTaskController);
 router.post("/:projectId/tasks/:taskId/attachments", protectedRoute, projectAccess, uploadTaskAttachment.array("files", 10), uploadTaskAttachmentController);
 export default router;      

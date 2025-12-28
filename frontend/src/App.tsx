@@ -23,9 +23,10 @@ import ProjectKanban from "./components/project/ProjectKanban.tsx";
 import ProjectMembers from "./components/project/ProjectMembers.tsx";
 import ProjectOverview from "./components/project/ProjectOverview.tsx";
 import { useAuthStore } from "./store/useAuthStore.ts";
-import React from "react";
 import { ThemeProvider } from "./components/theme-provider";
 import SettingsPage from "./pages/admin/SettingsPage";
+import TaskSummary from "./components/task/TaskSummary.tsx";
+import TaskList from "./components/task/TaskList.tsx";
 function App() {
   return (
     <>
@@ -73,8 +74,17 @@ function App() {
                 <Route path="/user" element={<StaffLayout />}>
                   <Route index element={<StaffHomePage />} />
 
-                  <Route path="spaces" element={<MyTasksPage />}>
-                    <Route path=":projectId" element={<ProjectKanban />} />
+                  <Route path="spaces" >
+                    <Route path=":projectId" element={<MyTasksPage />}>
+                    <Route
+                      index
+                      element={<Navigate to="summary" replace />}
+                    />
+                    
+                    <Route path="summary" element={<TaskSummary />} />
+                    <Route path="board" element={<ProjectKanban />} />
+                    <Route path="list" element={<TaskList />} />
+                  </Route>
                   </Route>
 
                   <Route path="profile" element={<StaffProfilePage />} />
