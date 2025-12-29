@@ -250,7 +250,7 @@ export default function ProjectKanban() {
                 />
             )}
             {/* 🔍 SEARCH + FILTER */}
-            <div className="grid grid-cols-1 mt-1 md:grid-cols-4 gap-6 min-w-[1000px] w-[1500px] md:min-w-0 px-2 mb-3">
+            <div className="grid px-6 grid-cols-1 mt-1 md:grid-cols-4 gap-6 min-w-[1000px] w-[1500px] md:min-w-0 px-2 mb-3">
                 <div className="flex gap-2 relative">
                     {/* Search */}
                     <input
@@ -336,7 +336,7 @@ export default function ProjectKanban() {
             </div>
 
 
-            <div className="flex gap-6 px-2 min-w-max">
+            <div className="flex gap-6 px-6 min-w-max">
                 <DragDropContext onDragEnd={onDragEnd}>
                     {COLUMNS.map((col) => (
                         <Droppable key={col} droppableId={col}>

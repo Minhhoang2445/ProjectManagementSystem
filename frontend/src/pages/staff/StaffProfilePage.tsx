@@ -23,7 +23,7 @@ export default function StaffProfilePage() {
     }
 
     return (
-        <div className="max-w-3xl mx-auto space-y-10">
+        <div className="max-w-3xl mx-auto space-y-10 p-6">
 
             {/* Header */}
             <div className="flex items-center gap-6 px-6 py-6 bg-white shadow rounded-xl">

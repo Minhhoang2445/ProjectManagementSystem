@@ -35,7 +35,7 @@ export default function ProjectDetailPage() {
 
   return (
     <>
-      <div className="w-full border-b border-gray-200 pb-1">
+      <div className="w-full border-b border-gray-200 pb-1 bg-white">
         <ProjectBreadcrumb project={project} />
         <ProjectDetailNavBar />
       </div>

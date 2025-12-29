@@ -11,7 +11,7 @@ export default function TaskNavbar() {
   const { projectId } = useParams();
 
   return (
-    <div className="w-full border-b bg-white">
+    <div className="w-full pt-5 border-b bg-white">
       <div className="flex gap-1 px-6">
         {tabs.map((tab) => (
           <NavLink

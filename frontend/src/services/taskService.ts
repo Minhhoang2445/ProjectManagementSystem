@@ -16,7 +16,7 @@ export const taskService = {
         return res.data;
     },
     getUserTasks: async () => {
-        const res = await api.get(`/users/me/tasks`);
+        const res = await api.get(`/project/user/me/tasks`);
         return res.data;
     },
     createTask: async (projectId: number, data: any) => {

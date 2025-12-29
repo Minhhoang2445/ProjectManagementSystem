@@ -120,6 +120,7 @@ export default function TaskList() {
   if (loading) return <div className="p-10 text-center">Loading...</div>;
 
   return (
+    
     <div className="p-6 space-y-4">
       {projectId && (
         <TaskDetailModal

@@ -50,7 +50,6 @@ function App() {
                     <Route index element={<ProjectPage />} />
                     <Route path="list" element={<ProjectListPage />} />
                     <Route path="create" element={<CreateProjectPage />} />
-
                     {/* PROJECT DETAIL */}
                     <Route path=":projectId" element={<ProjectDetailPage />}>
                       <Route
@@ -60,6 +59,7 @@ function App() {
 
                       <Route path="overview" element={<ProjectOverview />} />
                       <Route path="tasks" element={<ProjectKanban />} />
+                      <Route path="members" element={<ProjectMembers />} />
                       {/* CÁC TAB KHÁC */}
                       {/* <Route path="tasks" element={<ProjectKanban />} />
                     <Route path="members" element={<ProjectMembers />} /> */}

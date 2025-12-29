@@ -91,14 +91,14 @@ export default function ProjectCreatePage() {
     };
 
     return (
-        <div className="space-y-4 w-full">
+        <div className="w-full space-y-4 text-slate-900 dark:text-slate-100">
             <ProjectNavBar />
 
-            <div className="px-4 mx-auto">
-                <div className="bg-white shadow-xl rounded-2xl p-8 border border-gray-200  mx-auto">
+            <div className="mx-auto px-4">
+                <div className="mx-auto rounded-2xl border border-slate-200 bg-white/95 p-8 shadow-xl dark:border-slate-800 dark:bg-slate-900/90">
 
                     {/* TITLE */}
-                    <h2 className="text-3xl font-bold mb-8 text-gray-800">
+                    <h2 className="mb-8 text-3xl font-bold text-slate-900 dark:text-white">
                         Create New Project
                     </h2>
 
@@ -106,10 +106,10 @@ export default function ProjectCreatePage() {
 
                         {/* NAME */}
                         <div className="space-y-2">
-                            <label className="font-semibold text-gray-700">Project Name</label>
+                            <label className="font-semibold text-slate-700 dark:text-slate-200">Project Name</label>
                             <input
                                 {...register("name")}
-                                className="border p-3 rounded-xl w-full shadow-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-300 outline-none transition"
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-900 shadow-sm transition focus:bg-white focus:ring-2 focus:ring-purple-300 focus:outline-none dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
                                 placeholder="Enter project name..."
                             />
                             {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
@@ -117,10 +117,10 @@ export default function ProjectCreatePage() {
 
                         {/* DESCRIPTION */}
                         <div className="space-y-2">
-                            <label className="font-semibold text-gray-700">Description</label>
+                            <label className="font-semibold text-slate-700 dark:text-slate-200">Description</label>
                             <textarea
                                 {...register("description")}
-                                className="border p-3 rounded-xl w-full h-32 resize-none shadow-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-300 outline-none transition"
+                                className="h-32 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-900 shadow-sm transition focus:bg-white focus:ring-2 focus:ring-purple-300 focus:outline-none dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
                                 placeholder="Describe the project..."
                             />
                             {errors.description && (
@@ -131,11 +131,11 @@ export default function ProjectCreatePage() {
                         {/* DATES */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="font-semibold text-gray-700">Start Date</label>
+                                <label className="font-semibold text-slate-700 dark:text-slate-200">Start Date</label>
                                 <input
                                     type="date"
                                     {...register("startDate")}
-                                    className="border p-3 rounded-xl w-full shadow-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-300 outline-none transition"
+                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-900 shadow-sm transition focus:bg-white focus:ring-2 focus:ring-purple-300 focus:outline-none dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
                                 />
                                 {errors.startDate && (
                                     <p className="text-red-500 text-sm">{errors.startDate.message}</p>
@@ -143,11 +143,11 @@ export default function ProjectCreatePage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="font-semibold text-gray-700">End Date</label>
+                                <label className="font-semibold text-slate-700 dark:text-slate-200">End Date</label>
                                 <input
                                     type="date"
                                     {...register("endDate")}
-                                    className="border p-3 rounded-xl w-full shadow-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-300 outline-none transition"
+                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-900 shadow-sm transition focus:bg-white focus:ring-2 focus:ring-purple-300 focus:outline-none dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
                                 />
                                 {errors.endDate && (
                                     <p className="text-red-500 text-sm">{errors.endDate.message}</p>
@@ -157,10 +157,10 @@ export default function ProjectCreatePage() {
 
                         {/* MEMBERS */}
                         <div className="space-y-4">
-                            <label className="font-semibold text-gray-700 text-[15px]">Project Members</label>
+                            <label className="text-[15px] font-semibold text-slate-700 dark:text-slate-200">Project Members</label>
 
                             {members.length === 0 && (
-                                <p className="text-sm text-gray-500 italic">
+                                <p className="text-sm italic text-slate-500 dark:text-slate-400">
                                     No members selected. Click "Add Members" to begin.
                                 </p>
                             )}
@@ -169,19 +169,19 @@ export default function ProjectCreatePage() {
                                 {members.map((m, i) => (
                                     <div
                                         key={i}
-                                        className="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition"
+                                        className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-slate-700 dark:bg-slate-900"
                                     >
                                         {/* USER INFO */}
                                         <div className="flex items-center gap-4">
-                                            <div className="h-11 w-11 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 text-white font-bold flex items-center justify-center shadow">
+                                            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 font-bold text-white shadow">
                                                 {m.user.firstName[0]}
                                             </div>
 
                                             <div>
-                                                <p className="font-medium text-gray-800">
+                                                <p className="font-medium text-slate-900 dark:text-slate-100">
                                                     {m.user.firstName} {m.user.lastName}
                                                 </p>
-                                                <p className="text-xs text-gray-500">{m.user.email}</p>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400">{m.user.email}</p>
                                             </div>
                                         </div>
 
@@ -197,7 +197,7 @@ export default function ProjectCreatePage() {
                                                         )
                                                     );
                                                 }}
-                                                className="border px-3 py-1.5 rounded-lg bg-gray-50 text-sm font-medium shadow-sm"
+                                                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
                                             >
                                                 <option value="member">Member</option>
                                                 <option value="project_leader">Leader</option>
@@ -205,7 +205,7 @@ export default function ProjectCreatePage() {
 
                                             <button
                                                 onClick={() => setMembers(prev => prev.filter((_, idx) => idx !== i))}
-                                                className="text-red-500 hover:text-red-700 transition"
+                                                className="text-red-500 transition hover:text-red-700"
                                             >
                                                 ✕
                                             </button>
@@ -217,7 +217,7 @@ export default function ProjectCreatePage() {
                             <button
                                 type="button"
                                 onClick={() => setModalOpen(true)}
-                                className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-5 py-2 rounded-xl shadow hover:opacity-90 transition font-medium"
+                                className="rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-2 font-medium text-white shadow transition hover:opacity-90"
                             >
                                 + Add Members
                             </button>
@@ -226,7 +226,7 @@ export default function ProjectCreatePage() {
                         {/* SUBMIT BUTTON */}
                         <button
                             type="submit"
-                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 rounded-xl shadow hover:opacity-90 transition"
+                            className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3 font-semibold text-white shadow transition hover:opacity-90"
                         >
                             Create Project
                         </button>

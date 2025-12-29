@@ -62,17 +62,19 @@ export default function MyTasksPage() {
     if (!project?.members) return [];
     return project.members.map((m: any) => ({
       userId: m.userId,
-      // Fallback nếu API chưa trả về user
       firstName: m.user?.firstName || "Unknown",
       lastName: m.user?.lastName || "User",
     }));
   }, [project]);
   return (
-    <div>
+    <>
+    <div className="w-full  ">
       <TaskNavbar />
-
-      {/* 4. Truyền xuống Outlet */}
+    </div>
+    <div className="w-full space-y-4">
+      
       <Outlet context={{ project, user, role, isLeader, membersSummary }} />
     </div>
+    </>
   );
 }

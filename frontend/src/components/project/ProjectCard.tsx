@@ -2,38 +2,47 @@ import { useNavigate } from "react-router";
 export function ProjectCard({ project }: { project: any }) {
     const navigate = useNavigate();
     return (
-        <div className="p-4 border rounded-xl bg-white shadow-sm hover:shadow-md transition cursor-pointer"
+        <div
+            className="cursor-pointer rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm transition hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/80 dark:hover:border-blue-500/40 dark:hover:bg-slate-900"
             onClick={() => navigate(`/admin/projects/${project.id}`)}
         >
             {/* HEADER */}
-            <div className="flex items-center justify-between mb-3">
-                <h2 className="font-medium" style={{ color: project.color }}>
+            <div className="mb-3 flex items-center justify-between">
+                <h2
+                    className="font-medium text-slate-900 dark:text-white"
+                    style={{ color: project.color || undefined }}
+                >
                     {project.name}
                 </h2>
 
                 <span
-                    className="text-xs px-2 py-1 rounded-md"
-                    style={{ backgroundColor: project.color + "20", color: project.color }}
+                    className="rounded-md px-2 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                    style={{
+                        backgroundColor: project.color ? `${project.color}20` : undefined,
+                        color: project.color || undefined,
+                    }}
                 >
                     {project.status}
                 </span>
             </div>
 
             {/* DESCRIPTION */}
-            <p className="text-sm text-gray-600 mb-4">{project.description}</p>
+            <p className="mb-4 text-sm text-slate-600 dark:text-slate-400">
+                {project.description}
+            </p>
 
             {/* PROGRESS BAR */}
             <div>
-                <div className="w-full rounded-full bg-gray-200 h-2 mb-1"></div>
+                <div className="mb-1 h-2 w-full rounded-full bg-slate-200 dark:bg-slate-700"></div>
                 <div
-                    className="rounded-full h-2"
+                    className="h-2 rounded-full"
                     style={{
                         backgroundColor: project.color,
                         width: `${project.progress}%`,
                         marginTop: "-0.5rem",
                     }}
                 ></div>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                     {project.progress}% completed
                 </p>
             </div>
