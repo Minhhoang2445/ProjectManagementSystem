@@ -10,11 +10,11 @@ export default function TopNavbar() {
       {/* Left - logo */}
       <div className="flex items-center gap-2">
         <img
-          src="/logo.png"
+          src="/jari.png"
           alt="logo"
           className="w-8 h-8 rounded-full object-cover bg-gray-200"
         />
-        <span className="text-lg font-semibold">AProjectO</span>
+        <span className="text-lg font-semibold">JARI</span>
       </div>
 
       {/* Middle - search */}
