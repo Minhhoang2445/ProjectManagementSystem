@@ -16,7 +16,7 @@ export default function UserPickerModal({ open, onClose, onSelect, excludeUserId
             loadUsers();
             setSelectedUsers([]);
         }
-    }, [open, excludeUserIds]);
+    }, [open, excludeUserIds.join(",")]);
 
     const loadUsers = async () => {
         try {

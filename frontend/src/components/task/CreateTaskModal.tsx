@@ -194,7 +194,6 @@ export default function CreateTaskModal({
             </div>
           </div>
 
-          {/* 🔥 Upload File */}
           <div>
             <label className={labelClass}>Attachments</label>
             <label className="mt-1 flex cursor-pointer items-center gap-2 rounded-md border border-dashed px-3 py-2 text-sm text-gray-600 hover:bg-gray-50">

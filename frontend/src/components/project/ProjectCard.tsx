@@ -10,6 +10,29 @@ const PROJECT_STATUS_LABELS: Record<Project["status"], string> = {
     cancelled: "Cancelled",
 };
 
+const STATUS_STYLES: Record<Project["status"], { text: string; bg: string; border: string }> = {
+    planned: {
+        text: "text-slate-700",
+        bg: "bg-slate-100",
+        border: "border-slate-200",
+    },
+    in_progress: {
+        text: "text-sky-700",
+        bg: "bg-sky-50",
+        border: "border-sky-200",
+    },
+    completed: {
+        text: "text-emerald-700",
+        bg: "bg-emerald-50",
+        border: "border-emerald-200",
+    },
+    cancelled: {
+        text: "text-rose-700",
+        bg: "bg-rose-50",
+        border: "border-rose-200",
+    },
+};
+
 const getCompletionStats = (tasks?: Task[]) => {
     const normalizedTasks = Array.isArray(tasks) ? tasks : [];
     const done = normalizedTasks.filter((task) => task.status === "done").length;
@@ -23,6 +46,7 @@ export function ProjectCard({ project }: { project: Project }) {
     const { completion, done, total } = useMemo(() => getCompletionStats(project.tasks), [project.tasks]);
 
     const accentColor = project.color || "#0ea5e9";
+    const statusStyle = STATUS_STYLES[project.status] ?? STATUS_STYLES.planned;
 
     return (
         <div
@@ -36,11 +60,7 @@ export function ProjectCard({ project }: { project: Project }) {
                 </h2>
 
                 <span
-                    className="rounded-md px-2 py-1 text-xs font-medium text-slate-700"
-                    style={{
-                        backgroundColor: project.color ? `${project.color}20` : undefined,
-                        color: project.color || undefined,
-                    }}
+                    className={`rounded-full border px-2 py-1 text-xs font-semibold ${statusStyle.text} ${statusStyle.bg} ${statusStyle.border}`}
                 >
                     {PROJECT_STATUS_LABELS[project.status] ?? project.status}
                 </span>

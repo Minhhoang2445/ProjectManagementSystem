@@ -9,8 +9,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-} from "@/components/auth/dropdown-menu";
-import { Button } from "@/components/auth/button";
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import {
   Check,
   MoreHorizontal,

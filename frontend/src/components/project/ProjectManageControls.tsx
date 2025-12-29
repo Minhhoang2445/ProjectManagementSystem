@@ -38,7 +38,7 @@ type EditFormState = {
 
 export default function ProjectManageControls({ project, onProjectUpdated }: ProjectManageControlsProps) {
     const authUser = useAuthStore((state) => state.user);
-    const members = project?.members ?? [];
+    const members = useMemo(() => project?.members ?? [], [project?.members]);
 
     const canManage = useMemo(() => {
         if (!authUser) return false;
@@ -100,7 +100,7 @@ export default function ProjectManageControls({ project, onProjectUpdated }: Pro
             const response = await projectService.update(project.id, payload);
             const updatedProject = response?.project ?? response;
             onProjectUpdated?.(updatedProject as Project);
-            toast.success("Project updated successfully");
+            toast.success("Cập nhật dự án thành công");
             setIsDetailsModalOpen(false);
         } catch (error) {
             console.error("Failed to update project", error);
@@ -119,7 +119,7 @@ export default function ProjectManageControls({ project, onProjectUpdated }: Pro
             });
             const updatedProject = response?.project ?? response;
             onProjectUpdated?.(updatedProject as Project);
-            toast.success(`${users.length} member${users.length > 1 ? "s" : ""} added`);
+            toast.success(`${users.length} thành viên đã được thêm`);
         } catch (error) {
             console.error("Failed to add project members", error);
             toast.error("Không thể thêm thành viên mới");

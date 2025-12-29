@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router";
-import { useAuthStore } from "../store/useAuthStore";
+import { useAuthStore } from "../../store/useAuthStore";
 
 export function RoleRoute({ role }: { role: "admin" | "user" }) {
   const user = useAuthStore((s) => s.user);

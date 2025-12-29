@@ -293,7 +293,6 @@ export default function ProjectPortfolioOverview() {
                     <div className="rounded-2xl border border-slate-200 bg-white/95 p-5 shadow-sm">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs font-semibold uppercase text-slate-400">Portfolio list</p>
                                 <h3 className="text-lg font-semibold text-slate-900">Recently updated</h3>
                             </div>
                         </div>

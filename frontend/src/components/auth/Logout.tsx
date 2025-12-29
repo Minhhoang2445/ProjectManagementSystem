@@ -1,4 +1,4 @@
-import { Button } from "@/components/auth/button";
+import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useNavigate } from "react-router";
 

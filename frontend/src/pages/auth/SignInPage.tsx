@@ -1,4 +1,4 @@
-import { LoginForm } from "@/components/login-form"
+import { LoginForm } from "@/components/auth/login-form"
 import { useSearchParams } from "react-router";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";

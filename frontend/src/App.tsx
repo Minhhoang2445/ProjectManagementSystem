@@ -2,8 +2,8 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { Toaster } from "sonner";
 
 import SignInPage from "./pages/auth/SignInPage";
-import { ProtectedRoute } from "./pages/ProtectedRoute";
-import { RoleRoute } from "./pages/RoleRoute";
+import { ProtectedRoute } from "./pages/Route.tsx/ProtectedRoute.tsx";
+import { RoleRoute } from "./pages/Route.tsx/RoleRoute.tsx";
 
 import AdminLayout from "./layout/AdminLayout";
 import StaffLayout from "./layout/StaffLayout";
@@ -22,7 +22,6 @@ import ProjectDetailPage from "./pages/admin/ProjectDetailPage.tsx";
 import ProjectKanban from "./components/project/ProjectKanban.tsx";
 import ProjectMembers from "./components/project/ProjectMembers.tsx";
 import ProjectOverview from "./components/project/ProjectOverview.tsx";
-import { ThemeProvider } from "./components/theme-provider";
 import AdminProfilePage from "./pages/admin/AdminProfilePage.tsx";
 import TaskSummary from "./components/task/TaskSummary.tsx";
 import TaskList from "./components/task/TaskList.tsx";
@@ -30,7 +29,6 @@ import ProjectTasksLayout from "./components/task/ProjectTasksLayout.tsx";
 function App() {
   return (
     <>
-      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
         <Toaster richColors />
         <BrowserRouter>
           <Routes>
@@ -101,7 +99,6 @@ function App() {
             </Route>
           </Routes>
         </BrowserRouter>
-      </ThemeProvider>
     </>
   );
 }

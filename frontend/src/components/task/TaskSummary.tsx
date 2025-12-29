@@ -52,7 +52,7 @@ export default function TaskSummary() {
   const { project, isLeader, user } = useOutletContext<ProjectOutletContext>();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentProject, setCurrentProject] = useState<Project>(project);
+  const [currentProject, setCurrentProject] = useState<Project | null>(project ?? null);
 
   useEffect(() => {
     if (projectId) {
@@ -60,9 +60,13 @@ export default function TaskSummary() {
     }
   }, [projectId]);
 
+  const projectVersion = project
+    ? `${project.id ?? "none"}-${project.name ?? ""}-${project.status ?? ""}-${project.startDate ?? ""}-${project.endDate ?? ""}`
+    : "none";
+
   useEffect(() => {
-    setCurrentProject(project);
-  }, [project]);
+    setCurrentProject(project ?? null);
+  }, [projectVersion]);
 
   const loadTasks = async (id: number) => {
     try {

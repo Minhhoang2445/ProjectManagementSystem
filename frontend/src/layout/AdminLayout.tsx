@@ -1,6 +1,6 @@
 import AdminSidebar from "../components/admin/AdminSidebar";
 import { Outlet } from "react-router";
-import TopNavbar from "@/components/Navbar";
+import TopNavbar from "@/components/ui/Navbar";
 export default function AdminLayout() {
   return (
     <div className="flex h-screen overflow-hidden flex-col">

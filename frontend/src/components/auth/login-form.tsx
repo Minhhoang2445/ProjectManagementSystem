@@ -1,14 +1,14 @@
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/auth/button";
-import { Card, CardContent } from "@/components/auth/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@/components/auth/field";
-import { Input } from "@/components/auth/input";
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

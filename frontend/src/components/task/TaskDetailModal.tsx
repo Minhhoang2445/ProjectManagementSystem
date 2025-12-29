@@ -23,7 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { Paperclip, Trash2, Save, Download, X } from "lucide-react";
 import { toast } from "sonner";
 import { useTaskStore } from "../../store/useTaskStore";
-import { taskService } from "../../services/taskService"; // Import service
+import { taskService } from "../../services/taskService"; 
 import type { Task } from "../../types/Task";
 
 interface TaskDetailModalProps {
@@ -38,8 +38,8 @@ interface TaskUpdateForm {
     description: string;
     status: string;
     priority: string;
-    assigneeId?: string; // string vì FormData
-    dueDate?: string;    // yyyy-MM-dd
+    assigneeId?: string; 
+    dueDate?: string;    
 }
 export const TaskDetailModal = ({ taskId, projectId, isOpen, onClose, canEdit = false }: TaskDetailModalProps) => {
     const [task, setTask] = useState<Task | null>(null);
@@ -58,13 +58,11 @@ export const TaskDetailModal = ({ taskId, projectId, isOpen, onClose, canEdit = 
 
     const { fetchTasks } = useTaskStore();
 
-    // 1. Fetch Data
     useEffect(() => {
         if (isOpen && taskId) {
             const loadData = async () => {
                 setIsLoading(true);
                 try {
-                    // Gọi qua Service
                     const data = await taskService.getTaskById(projectId,taskId);
                     setTask(data);
                     setFormData({
@@ -87,12 +85,10 @@ export const TaskDetailModal = ({ taskId, projectId, isOpen, onClose, canEdit = 
     }, [isOpen, taskId, projectId]);
 
     
-    // 3. Handle Delete
     const handleDelete = async () => {
         if (!taskId) return;
         if (!confirm("Bạn có chắc muốn xóa công việc này?")) return;
         try {
-            // Gọi qua Service
             await taskService.deleteTask(projectId, taskId);
 
             toast.success("Đã xóa công việc");
