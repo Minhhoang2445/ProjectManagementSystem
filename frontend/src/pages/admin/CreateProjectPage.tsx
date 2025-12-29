@@ -11,12 +11,15 @@ import type { User } from "@/types/User";
 import type { MemberUI } from "@/types/Project";
 
 
+const statusSchema = z.enum(["planned", "in_progress", "completed", "cancelled"]);
+
 const projectCreateSchema = z
     .object({
         name: z.string().min(1, "Name is required"),
         description: z.string().min(1, "Description is required"),
         startDate: z.string().min(1, "Start date is required"),
         endDate: z.string().min(1, "End date is required"),
+        status: statusSchema,
     })
     .superRefine((data, ctx) => {
         const start = new Date(data.startDate);
@@ -50,6 +53,9 @@ export default function ProjectCreatePage() {
     const { register, handleSubmit, formState: { errors } } =
         useForm<ProjectCreateForm>({
             resolver: zodResolver(projectCreateSchema),
+            defaultValues: {
+                status: "planned",
+            },
         });
 
     // Add users
@@ -79,6 +85,7 @@ export default function ProjectCreatePage() {
                 data.description,
                 data.startDate,
                 data.endDate,
+                data.status,
                 members
             );
 
@@ -91,76 +98,85 @@ export default function ProjectCreatePage() {
     };
 
     return (
-        <div className="w-full space-y-4 text-slate-900 dark:text-slate-100">
+        <div className="w-full space-y-4 text-slate-900">
             <ProjectNavBar />
 
             <div className="mx-auto px-4">
-                <div className="mx-auto rounded-2xl border border-slate-200 bg-white/95 p-8 shadow-xl dark:border-slate-800 dark:bg-slate-900/90">
-
-                    {/* TITLE */}
-                    <h2 className="mb-8 text-3xl font-bold text-slate-900 dark:text-white">
+                <div className="mx-auto rounded-2xl border border-slate-200 bg-white/95 p-8 shadow-xl">
+                    <h2 className="mb-8 text-3xl font-bold text-slate-900">
                         Create New Project
                     </h2>
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-
-                        {/* NAME */}
                         <div className="space-y-2">
-                            <label className="font-semibold text-slate-700 dark:text-slate-200">Project Name</label>
+                            <label className="font-semibold text-slate-700">Project Name</label>
                             <input
                                 {...register("name")}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-900 shadow-sm transition focus:bg-white focus:ring-2 focus:ring-purple-300 focus:outline-none dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-900 shadow-sm transition focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-300"
                                 placeholder="Enter project name..."
                             />
-                            {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+                            {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
                         </div>
 
-                        {/* DESCRIPTION */}
                         <div className="space-y-2">
-                            <label className="font-semibold text-slate-700 dark:text-slate-200">Description</label>
+                            <label className="font-semibold text-slate-700">Description</label>
                             <textarea
                                 {...register("description")}
-                                className="h-32 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-900 shadow-sm transition focus:bg-white focus:ring-2 focus:ring-purple-300 focus:outline-none dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+                                className="h-32 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-900 shadow-sm transition focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-300"
                                 placeholder="Describe the project..."
                             />
                             {errors.description && (
-                                <p className="text-red-500 text-sm">{errors.description.message}</p>
+                                <p className="text-sm text-red-500">{errors.description.message}</p>
                             )}
                         </div>
 
-                        {/* DATES */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div className="space-y-2">
-                                <label className="font-semibold text-slate-700 dark:text-slate-200">Start Date</label>
+                                <label className="font-semibold text-slate-700">Start Date</label>
                                 <input
                                     type="date"
                                     {...register("startDate")}
-                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-900 shadow-sm transition focus:bg-white focus:ring-2 focus:ring-purple-300 focus:outline-none dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-900 shadow-sm transition focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-300"
                                 />
                                 {errors.startDate && (
-                                    <p className="text-red-500 text-sm">{errors.startDate.message}</p>
+                                    <p className="text-sm text-red-500">{errors.startDate.message}</p>
                                 )}
                             </div>
 
                             <div className="space-y-2">
-                                <label className="font-semibold text-slate-700 dark:text-slate-200">End Date</label>
+                                <label className="font-semibold text-slate-700">End Date</label>
                                 <input
                                     type="date"
                                     {...register("endDate")}
-                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-900 shadow-sm transition focus:bg-white focus:ring-2 focus:ring-purple-300 focus:outline-none dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-900 shadow-sm transition focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-300"
                                 />
                                 {errors.endDate && (
-                                    <p className="text-red-500 text-sm">{errors.endDate.message}</p>
+                                    <p className="text-sm text-red-500">{errors.endDate.message}</p>
                                 )}
                             </div>
                         </div>
 
-                        {/* MEMBERS */}
+                        <div className="space-y-2">
+                            <label className="font-semibold text-slate-700">Status</label>
+                            <select
+                                {...register("status")}
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-900 shadow-sm transition focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-300"
+                            >
+                                <option value="planned">Planned</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                            {errors.status && (
+                                <p className="text-sm text-red-500">{errors.status.message}</p>
+                            )}
+                        </div>
+
                         <div className="space-y-4">
-                            <label className="text-[15px] font-semibold text-slate-700 dark:text-slate-200">Project Members</label>
+                            <label className="text-[15px] font-semibold text-slate-700">Project Members</label>
 
                             {members.length === 0 && (
-                                <p className="text-sm italic text-slate-500 dark:text-slate-400">
+                                <p className="text-sm italic text-slate-500">
                                     No members selected. Click "Add Members" to begin.
                                 </p>
                             )}
@@ -169,23 +185,21 @@ export default function ProjectCreatePage() {
                                 {members.map((m, i) => (
                                     <div
                                         key={i}
-                                        className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-slate-700 dark:bg-slate-900"
+                                        className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md"
                                     >
-                                        {/* USER INFO */}
                                         <div className="flex items-center gap-4">
                                             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 font-bold text-white shadow">
                                                 {m.user.firstName[0]}
                                             </div>
 
                                             <div>
-                                                <p className="font-medium text-slate-900 dark:text-slate-100">
+                                                <p className="font-medium text-slate-900">
                                                     {m.user.firstName} {m.user.lastName}
                                                 </p>
-                                                <p className="text-xs text-slate-500 dark:text-slate-400">{m.user.email}</p>
+                                                <p className="text-xs text-slate-500">{m.user.email}</p>
                                             </div>
                                         </div>
 
-                                        {/* ROLE + REMOVE */}
                                         <div className="flex items-center gap-3">
                                             <select
                                                 value={m.role}
@@ -197,7 +211,7 @@ export default function ProjectCreatePage() {
                                                         )
                                                     );
                                                 }}
-                                                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                                                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium shadow-sm"
                                             >
                                                 <option value="member">Member</option>
                                                 <option value="project_leader">Leader</option>
@@ -223,7 +237,6 @@ export default function ProjectCreatePage() {
                             </button>
                         </div>
 
-                        {/* SUBMIT BUTTON */}
                         <button
                             type="submit"
                             className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3 font-semibold text-white shadow transition hover:opacity-90"
@@ -234,7 +247,6 @@ export default function ProjectCreatePage() {
                 </div>
             </div>
 
-            {/* MODAL */}
             <UserPickerModal
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}

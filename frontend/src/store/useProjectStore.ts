@@ -41,6 +41,7 @@ export const useAdminStore = create<projectState>((set, get) => ({
         description,
         startDate,
         endDate,
+        status = "planned",
         members 
     ) => {
         try {
@@ -51,6 +52,7 @@ export const useAdminStore = create<projectState>((set, get) => ({
                 description ?? null,
                 startDate ?? null,
                 endDate ?? null,
+                status,
                 members 
             );
 

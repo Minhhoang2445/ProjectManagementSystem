@@ -1,4 +1,4 @@
-import { NavLink, useParams } from "react-router";
+import { NavLink, useLocation, useParams } from "react-router";
 import { BarChart3, LayoutGrid, List } from "lucide-react";
 
 const tabs = [
@@ -9,6 +9,12 @@ const tabs = [
 
 export default function TaskNavbar() {
   const { projectId } = useParams();
+  const location = useLocation();
+
+  const isAdminRoute = location.pathname.includes("/admin/projects");
+  const basePath = isAdminRoute
+    ? `/admin/projects/${projectId}/tasks`
+    : `/user/spaces/${projectId}`;
 
   return (
     <div className="w-full pt-5 border-b bg-white">
@@ -16,7 +22,7 @@ export default function TaskNavbar() {
         {tabs.map((tab) => (
           <NavLink
             key={tab.path}
-            to={`/user/spaces/${projectId}/${tab.path}`}
+            to={`${basePath}/${tab.path}`}
             className={({ isActive }) =>
               `flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
                 isActive

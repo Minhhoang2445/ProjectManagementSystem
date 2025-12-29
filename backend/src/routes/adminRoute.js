@@ -9,7 +9,7 @@ const router = express.Router();
 
 
 router.get("/stats", protectedRoute, adminOnly, getSystemStats);
-router.get("/users", protectedRoute, adminOnly, getAllUsers);
+router.get("/users", protectedRoute, getAllUsers);
 router.patch("/users/:id/status", protectedRoute, adminOnly, updateUserStatus);
 router.post("/projects", protectedRoute, adminOnly, validateBody(projectSchema), createProject); 
 router.get("/projects", protectedRoute, adminOnly, getAllProjects); 

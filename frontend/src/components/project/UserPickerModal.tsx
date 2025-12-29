@@ -5,21 +5,30 @@ import type { UserPickerModalProps } from "@/types/Project";
 import { toast } from "sonner";
 import { Check, Search } from "lucide-react";
 
-export default function UserPickerModal({ open, onClose, onSelect }: UserPickerModalProps) {
+export default function UserPickerModal({ open, onClose, onSelect, excludeUserIds = [] }: UserPickerModalProps) {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
     const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
 
     useEffect(() => {
-        if (open) loadUsers();
-    }, [open]);
+        if (open) {
+            loadUsers();
+            setSelectedUsers([]);
+        }
+    }, [open, excludeUserIds]);
 
     const loadUsers = async () => {
         try {
             setLoading(true);
-            const data = await adminService.getAllUsers();
-            setUsers(Array.isArray(data) ? data : []);
+            const payload = await adminService.getAllUsers({ page: 1, limit: 1000 });
+            const fetchedUsers = Array.isArray(payload)
+                ? payload
+                : Array.isArray((payload as any)?.data)
+                    ? (payload as any).data
+                    : [];
+            const excludedSet = new Set(excludeUserIds ?? []);
+            setUsers(fetchedUsers.filter((user) => !excludedSet.has(user.id)));
         } catch (error) {
             console.error(error);
             toast.error("Failed to load users");

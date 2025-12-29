@@ -1,9 +1,9 @@
 import express from "express";
-import { createProject, getAllProjects, getProjectById, getUserProjectsController } from "../controllers/projectController.js";
+import { createProject, getAllProjects, getProjectById, getUserProjectsController, updateProject } from "../controllers/projectController.js";
 
 import { protectedRoute, adminOnly } from "../middleware/authMiddleware.js";
 import { validateBody } from "../middleware/validateMiddleware.js";
-import { projectSchema } from "../schema/project.schema.js";
+import { projectSchema, projectUpdateSchema } from "../schema/project.schema.js";
 import { projectAccess } from "../middleware/projectAccessMiddleware.js";
 import { createTaskSchema } from "../schema/task.schema.js";
 import { canCreateAndDeleteTask, canSeeTask } from "../middleware/taskPermissionMiddleware.js";
@@ -15,8 +15,9 @@ router.post("/", protectedRoute, adminOnly, validateBody(projectSchema), createP
 
 router.get("/", protectedRoute, adminOnly, getAllProjects);
 
-router.get("/:projectId", protectedRoute, projectAccess, getProjectById);
 router.get("/user/me/projects", protectedRoute, getUserProjectsController);
+router.get("/:projectId", protectedRoute, projectAccess, getProjectById);
+router.patch("/:projectId", protectedRoute, projectAccess, validateBody(projectUpdateSchema), updateProject);
 
 
 // route task related to project

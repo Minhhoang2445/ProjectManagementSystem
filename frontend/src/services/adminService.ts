@@ -1,4 +1,5 @@
 import axiosInstance from "../lib/axios";
+import api from "../lib/axios";
 
 export interface SystemStats {
   totalProjects: number;
@@ -15,14 +16,15 @@ export interface SystemStats {
     status: string;
   }[];
 }
-import api from "../lib/axios";
+
 export const getSystemStats = async (): Promise<SystemStats> => {
   const response = await axiosInstance.get("/admin/stats");
   return response.data;
 };
+
 export const adminService = {
-  getAllUsers: async () => {
-    const res = await api.get("/admin/users");
+  getAllUsers: async (params?: Record<string, unknown>) => {
+    const res = await api.get("/admin/users", { params });
     return res.data;
   },
   updateUserStatus: async (id: string, status: string) => {

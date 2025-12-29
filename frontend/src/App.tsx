@@ -22,11 +22,11 @@ import ProjectDetailPage from "./pages/admin/ProjectDetailPage.tsx";
 import ProjectKanban from "./components/project/ProjectKanban.tsx";
 import ProjectMembers from "./components/project/ProjectMembers.tsx";
 import ProjectOverview from "./components/project/ProjectOverview.tsx";
-import { useAuthStore } from "./store/useAuthStore.ts";
 import { ThemeProvider } from "./components/theme-provider";
-import SettingsPage from "./pages/admin/SettingsPage";
+import AdminProfilePage from "./pages/admin/AdminProfilePage.tsx";
 import TaskSummary from "./components/task/TaskSummary.tsx";
 import TaskList from "./components/task/TaskList.tsx";
+import ProjectTasksLayout from "./components/task/ProjectTasksLayout.tsx";
 function App() {
   return (
     <>
@@ -44,7 +44,7 @@ function App() {
               <Route element={<RoleRoute role="admin" />}>
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<DashboardPage />} />
-                  <Route path="settings" element={<SettingsPage />} />
+                  <Route path="profile" element={<AdminProfilePage />} />
                   <Route path="users" element={<UsersPage />} />
                   <Route path="projects">
                     <Route index element={<ProjectPage />} />
@@ -58,7 +58,15 @@ function App() {
                       />
 
                       <Route path="overview" element={<ProjectOverview />} />
-                      <Route path="tasks" element={<ProjectKanban />} />
+                      <Route path="tasks" element={<ProjectTasksLayout />}>
+                        <Route
+                          index
+                          element={<Navigate to="summary" replace />}
+                        />
+                        <Route path="summary" element={<TaskSummary />} />
+                        <Route path="board" element={<ProjectKanban />} />
+                        <Route path="list" element={<TaskList />} />
+                      </Route>
                       <Route path="members" element={<ProjectMembers />} />
                       {/* CÁC TAB KHÁC */}
                       {/* <Route path="tasks" element={<ProjectKanban />} />

@@ -1,12 +1,13 @@
 import { NavLink } from "react-router";
-import { Home, Users, Settings, Folder } from "lucide-react";
+import { Home, Users, Folder, UserRound } from "lucide-react";
 import { LogOut } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 const nav = [
   { name: "Dashboard", icon: Home, path: "/admin" },
   { name: "Users", icon: Users, path: "/admin/users" },
-  { name: "Settings", icon: Settings, path: "/admin/settings" },
+  
   { name: "Project", icon: Folder, path: "/admin/projects" },
+  { name: "Profile", icon: UserRound, path: "/admin/profile" },
 ];
 
 export default function AdminSidebar() {

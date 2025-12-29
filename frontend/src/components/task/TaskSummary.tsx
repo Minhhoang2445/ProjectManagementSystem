@@ -3,6 +3,8 @@ import { useParams, useOutletContext } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { taskService } from "@/services/taskService";
 import type { Task } from "@/types/Task";
+import type { Project } from "@/types/Project";
+import ProjectManageControls from "@/components/project/ProjectManageControls";
 import {
   BarChart,
   Bar,
@@ -16,10 +18,10 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { CheckCircle2, Clock, TrendingUp, AlertCircle } from "lucide-react";
+import { CheckCircle2, Clock, TrendingUp, AlertCircle, Users, CalendarDays } from "lucide-react";
 
 interface ProjectOutletContext {
-  project: any;
+  project: Project;
   user: any;
   role: string | null;
   isLeader: boolean;
@@ -34,17 +36,33 @@ const COLORS = {
   cancelled: "#ef4444",
 };
 
+const formatProjectDate = (value?: string | null) => {
+  if (!value) return "Not set";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Not set";
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
 export default function TaskSummary() {
   const { projectId } = useParams();
-  const { isLeader, user } = useOutletContext<ProjectOutletContext>();
+  const { project, isLeader, user } = useOutletContext<ProjectOutletContext>();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentProject, setCurrentProject] = useState<Project>(project);
 
   useEffect(() => {
     if (projectId) {
       loadTasks(Number(projectId));
     }
   }, [projectId]);
+
+  useEffect(() => {
+    setCurrentProject(project);
+  }, [project]);
 
   const loadTasks = async (id: number) => {
     try {
@@ -85,6 +103,10 @@ export default function TaskSummary() {
     return { total: myTasks.length, byStatus, byPriority, overdue };
   }, [tasks, isLeader, user]);
 
+  const handleProjectUpdated = (updatedProject: Project) => {
+    setCurrentProject(updatedProject);
+  };
+
   const statusData = Object.entries(stats.byStatus).map(([name, value]) => ({
     name: name.replace("_", " ").toUpperCase(),
     value,
@@ -98,11 +120,16 @@ export default function TaskSummary() {
     })
   );
 
+  const memberCount = currentProject?.members?.length ?? 0;
+  const statusLabel = currentProject?.status?.replace("_", " ") ?? "Unknown";
+  const startDateLabel = formatProjectDate(currentProject?.startDate);
+  const endDateLabel = formatProjectDate(currentProject?.endDate);
+
   if (loading) return <div className="p-10 text-center">Loading...</div>;
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
+    <>
+    <div className="px-6 pt-6">
         <h2 className="text-2xl font-bold">
           {isLeader ? "Project Overview" : "My Tasks Overview"}
         </h2>
@@ -112,6 +139,50 @@ export default function TaskSummary() {
             : "Track your assigned tasks and progress"}
         </p>
       </div>
+    <div className="px-6 space-y-6">
+      {isLeader && (
+        <ProjectManageControls
+          project={currentProject}
+          onProjectUpdated={handleProjectUpdated}
+        />
+      )}
+      {isLeader && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Team members</CardTitle>
+              <Users className="h-4 w-4 text-emerald-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{memberCount}</div>
+              <p className="text-xs text-muted-foreground">Active collaborators in this project</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Project status</CardTitle>
+              <TrendingUp className="h-4 w-4 text-indigo-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-xl font-semibold capitalize">{statusLabel}</div>
+              <p className="text-xs text-muted-foreground">Latest saved state</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Schedule</CardTitle>
+              <CalendarDays className="h-4 w-4 text-sky-600" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-muted-foreground">Start</p>
+              <p className="text-sm font-semibold">{startDateLabel}</p>
+              <p className="mt-2 text-xs text-muted-foreground">End</p>
+              <p className="text-sm font-semibold">{endDateLabel}</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+      
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -220,5 +291,6 @@ export default function TaskSummary() {
         </Card>
       </div>
     </div>
+    </>
   );
 }

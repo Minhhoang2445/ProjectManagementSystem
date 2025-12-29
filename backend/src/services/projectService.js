@@ -1,24 +1,33 @@
 import prisma from "../utils/prisma.js";
+
+const normalizeDateInput = (value) => {
+    if (!value) return null;
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
 export const createProjectService = async (projectData) => {
     try {
-        const { name, description, startDate, endDate, members } = projectData;
+        const { name, description, startDate, endDate, members, status = "planned" } = projectData;
         return await prisma.$transaction(async (tx) => {
             const project = await tx.project.create({
                 data: {
                     name,
                     description,
-                    startDate: new Date(startDate),
-                    endDate: new Date(endDate),
+                    status,
+                    startDate: normalizeDateInput(startDate),
+                    endDate: normalizeDateInput(endDate),
                 },
             });
 
-            const memberData = members.map(m => ({
+            const memberData = members.map((m) => ({
                 projectId: project.id,
                 userId: m.userId,
-                roleInProject: m.role || "member"
-            }))
+                roleInProject: m.role || "member",
+            }));
+
             await tx.projectMember.createMany({
-                data: memberData
+                data: memberData,
             });
 
             return project;
@@ -36,11 +45,23 @@ export const getAllProjectsService = async () => {
                 id: true,
                 name: true,
                 description: true,
+                status: true,
                 startDate: true,
-                endDate: true
-            }
+                endDate: true,
+                createdAt: true,
+                tasks: {
+                    select: {
+                        id: true,
+                        status: true,
+                    },
+                },
+            },
         });
-        return projects;
+
+        return projects.map((project) => ({
+            ...project,
+            tasks: project.tasks ?? [],
+        }));
     } catch (error) {
         console.error(" PRISMA ERROR:", error);
         return null;
@@ -55,8 +76,10 @@ export const getProjectByIdService = async (id) => {
                 id: true,
                 name: true,
                 description: true,
+                status: true,
                 startDate: true,
                 endDate: true,
+                createdAt: true,
                 members: {
                     select: {
                         userId: true,
@@ -67,14 +90,20 @@ export const getProjectByIdService = async (id) => {
                                 firstName: true,
                                 lastName: true,
                                 email: true,
-                                avatar: true
-                            }
-                        }
-                    }
-                }
-            }
+                                avatar: true,
+                            },
+                        },
+                    },
+                },
+                tasks: {
+                    select: {
+                        id: true,
+                        status: true,
+                    },
+                },
+            },
         });
-        return project;
+        return project ? { ...project, tasks: project.tasks ?? [] } : null;
     } catch (error) {
         console.error(" PRISMA ERROR:", error);
         return null;
@@ -101,6 +130,98 @@ export const getUserProjectsService = async (userId) => {
         });
     } catch (error) {
         console.error(" PRISMA ERROR:", error);
+        throw error;
+    }
+};
+
+export const updateProjectService = async ({ projectId, payload }) => {
+    try {
+        const id = Number(projectId);
+        return await prisma.$transaction(async (tx) => {
+            const { name, description, status, startDate, endDate, members } = payload;
+
+            const updates = {};
+            if (name !== undefined) updates.name = name;
+            if (description !== undefined) updates.description = description;
+            if (status !== undefined) updates.status = status;
+            if (startDate !== undefined) updates.startDate = normalizeDateInput(startDate);
+            if (endDate !== undefined) updates.endDate = normalizeDateInput(endDate);
+
+            if (Object.keys(updates).length) {
+                await tx.project.update({
+                    where: { id },
+                    data: updates,
+                });
+            }
+
+            if (Array.isArray(members) && members.length) {
+                const uniqueMembers = members.filter(
+                    (member, index, array) => index === array.findIndex((item) => item.userId === member.userId)
+                );
+
+                const existingMembers = await tx.projectMember.findMany({
+                    where: {
+                        projectId: id,
+                        userId: {
+                            in: uniqueMembers.map((member) => member.userId),
+                        },
+                    },
+                    select: { userId: true },
+                });
+
+                const existingIds = new Set(existingMembers.map((member) => member.userId));
+                const membersToCreate = uniqueMembers
+                    .filter((member) => !existingIds.has(member.userId))
+                    .map((member) => ({
+                        projectId: id,
+                        userId: member.userId,
+                        roleInProject: member.role || "member",
+                    }));
+
+                if (membersToCreate.length) {
+                    await tx.projectMember.createMany({
+                        data: membersToCreate,
+                        skipDuplicates: true,
+                    });
+                }
+            }
+
+            return tx.project.findUnique({
+                where: { id },
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    status: true,
+                    startDate: true,
+                    endDate: true,
+                    createdAt: true,
+                    members: {
+                        select: {
+                            userId: true,
+                            roleInProject: true,
+                            user: {
+                                select: {
+                                    id: true,
+                                    firstName: true,
+                                    lastName: true,
+                                    email: true,
+                                    avatar: true,
+                                },
+                            },
+                        },
+                    },
+                    tasks: {
+                        select: {
+                            id: true,
+                            status: true,
+                        },
+                    },
+                },
+            });
+        });
+    } catch (error) {
+        console.error("update project error:", error);
         throw error;
     }
 };

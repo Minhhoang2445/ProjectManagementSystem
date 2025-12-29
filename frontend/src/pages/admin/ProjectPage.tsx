@@ -1,11 +1,11 @@
 import ProjectNavBar from "@/components/project/ProjectNavBar";
-import ProjectOverview from "@/components/project/ProjectOverview";
+import ProjectPortfolioOverview from "@/components/project/ProjectPortfolioOverview";
+
 export default function ProjectPage() {
     return (
-        <div className="space-y-4  w-full  ">
-            
+        <div className="w-full space-y-4">
             <ProjectNavBar />
-            
+            <ProjectPortfolioOverview />
         </div>
     );
 }

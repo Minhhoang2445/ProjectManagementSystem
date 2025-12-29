@@ -1,4 +1,5 @@
-import type {Task} from "./Task.ts";
+import type { Task } from "./Task.ts";
+import type { User } from "./User";
 export interface Project {
     id: number;
     name: string;
@@ -7,6 +8,7 @@ export interface Project {
     startDate?: string;
     endDate?: string;
     createdAt: string;
+    color?: string;
 
     members?: ProjectMember[];
     tasks?: Task[];
@@ -16,13 +18,14 @@ export interface ProjectMember {
   projectId: number;
   userId: number;
   roleInProject: "project_leader" | "member";
+  user?: User;
 }
-import type { User } from "./User";
 
 export interface UserPickerModalProps {
   open: boolean;
   onClose: () => void;
   onSelect: (users: User[]) => void;
+  excludeUserIds?: number[];
 }
 export interface MemberUI{
   userId: number;

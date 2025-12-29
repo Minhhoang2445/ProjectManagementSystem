@@ -27,6 +27,7 @@ export interface projectState {
         description: string ,
         startDate: string ,
         endDate: string ,
+        status: Project["status"],
         members: { userId: number; role: string } []
     ) => Promise<void>;
     getUserProjects: (userId: number) => Promise<void>;

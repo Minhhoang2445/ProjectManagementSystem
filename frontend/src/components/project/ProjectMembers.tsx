@@ -1,27 +1,32 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router";
-import { Loader2, RefreshCcw, UsersRound } from "lucide-react";
+import { RefreshCcw, UsersRound } from "lucide-react";
 import { projectService } from "@/services/projectService";
 import type { MemberUI } from "@/types/Project";
+import { useAuthStore } from "@/store/useAuthStore";
+import UserPickerModal from "@/components/project/UserPickerModal";
+import type { User } from "@/types/User";
+import { toast } from "sonner";
 
 type ProjectMembersProps = {
     projectId?: number;
 };
 
 const ROLE_BADGES: Record<MemberUI["role"], string> = {
-    project_leader:
-        "bg-amber-100/70 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-200 dark:border-amber-500/30",
-    member:
-        "bg-blue-100/60 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-200 dark:border-blue-500/30",
+    project_leader: "bg-amber-100/70 text-amber-700 border-amber-200",
+    member: "bg-blue-100/60 text-blue-700 border-blue-200",
 };
 
 export default function ProjectMembers({ projectId: projectIdProp }: ProjectMembersProps) {
     const { projectId: projectIdFromRoute } = useParams();
     const resolvedProjectId = projectIdProp ?? (projectIdFromRoute ? Number(projectIdFromRoute) : undefined);
+    const authUser = useAuthStore((state) => state.user);
 
     const [members, setMembers] = useState<MemberUI[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const normalizeMembers = (rawMembers: any[] | undefined | null): MemberUI[] => {
         if (!Array.isArray(rawMembers)) return [];
@@ -71,35 +76,69 @@ export default function ProjectMembers({ projectId: projectIdProp }: ProjectMemb
     }, [members]);
 
     const total = members.length;
+    const canManage = useMemo(() => {
+        if (!authUser) return false;
+        if (authUser.role === "admin") return true;
+        return leaders.some((leader) => leader.userId === authUser.id);
+    }, [authUser, leaders]);
+
+    const handleMembersSelect = useCallback(
+        async (users: User[]) => {
+            if (!users.length || !resolvedProjectId) return;
+            setIsSubmitting(true);
+            try {
+                await projectService.update(resolvedProjectId, {
+                    members: users.map((user) => ({ userId: user.id, role: "member" })),
+                });
+                toast.success(`${users.length} member${users.length > 1 ? "s" : ""} added`);
+                await fetchMembers();
+            } catch (err) {
+                console.error("Failed to add members", err);
+                toast.error("Không thể thêm thành viên mới");
+            } finally {
+                setIsSubmitting(false);
+            }
+        },
+        [fetchMembers, resolvedProjectId]
+    );
 
     return (
-        <section className="rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/85">
+        <section className="rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-sm backdrop-blur">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                         Delivery team
                     </p>
-                    <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Team Members</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                    <h2 className="text-2xl font-semibold text-slate-900">Team Members</h2>
+                    <p className="text-sm text-slate-500">
                         {total ? `${total} collaborators assigned to this project.` : "No members assigned yet."}
                     </p>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
                     <UsersRound className="h-5 w-5" />
                     <span>{leaders.length} leads · {teammates.length} members</span>
                     <button
                         onClick={fetchMembers}
                         disabled={loading}
-                        className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-blue-300 hover:text-blue-600 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:border-blue-400 dark:hover:text-blue-200"
+                        className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-blue-300 hover:text-blue-600 disabled:opacity-50"
                     >
                         <RefreshCcw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
                         Refresh
                     </button>
+                    {canManage && (
+                        <button
+                            onClick={() => setIsPickerOpen(true)}
+                            disabled={isSubmitting}
+                            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-blue-300 hover:text-blue-600 disabled:opacity-50"
+                        >
+                            {isSubmitting ? "Adding…" : "Add members"}
+                        </button>
+                    )}
                 </div>
             </div>
 
             {error && (
-                <div className="mt-4 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-600 dark:border-rose-900/40 dark:bg-rose-500/10 dark:text-rose-200">
+                <div className="mt-4 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-600">
                     {error}
                 </div>
             )}
@@ -107,14 +146,14 @@ export default function ProjectMembers({ projectId: projectIdProp }: ProjectMemb
             {loading ? (
                 <div className="mt-6 grid gap-4 md:grid-cols-2">
                     {Array.from({ length: 4 }).map((_, idx) => (
-                        <div key={idx} className="animate-pulse rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/60">
-                            <div className="mb-3 h-4 w-32 rounded bg-slate-200 dark:bg-slate-700" />
-                            <div className="h-3 w-48 rounded bg-slate-100 dark:bg-slate-700" />
+                        <div key={idx} className="animate-pulse rounded-xl border border-slate-100 bg-slate-50/60 p-4">
+                            <div className="mb-3 h-4 w-32 rounded bg-slate-200" />
+                            <div className="h-3 w-48 rounded bg-slate-100" />
                         </div>
                     ))}
                 </div>
             ) : total === 0 ? (
-                <div className="mt-6 rounded-xl border border-dashed border-slate-300 px-6 py-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                <div className="mt-6 rounded-xl border border-dashed border-slate-300 px-6 py-10 text-center text-sm text-slate-500">
                     No members have been assigned. Use the project settings to invite collaborators.
                 </div>
             ) : (
@@ -122,7 +161,7 @@ export default function ProjectMembers({ projectId: projectIdProp }: ProjectMemb
                     {members.map((member) => (
                         <article
                             key={member.userId}
-                            className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm transition hover:border-blue-200 hover:shadow dark:border-slate-700 dark:bg-slate-900/70"
+                            className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm transition hover:border-blue-200 hover:shadow"
                         >
                             {member.user.avatar ? (
                                 <img
@@ -137,10 +176,10 @@ export default function ProjectMembers({ projectId: projectIdProp }: ProjectMemb
                             )}
 
                             <div className="flex-1">
-                                <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                                <p className="text-sm font-semibold text-slate-900">
                                     {member.user.firstName} {member.user.lastName}
                                 </p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">{member.user.email}</p>
+                                <p className="text-xs text-slate-500">{member.user.email}</p>
                                 <span
                                     className={`mt-2 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${ROLE_BADGES[member.role]}`}
                                 >
@@ -151,6 +190,12 @@ export default function ProjectMembers({ projectId: projectIdProp }: ProjectMemb
                     ))}
                 </div>
             )}
+            <UserPickerModal
+                open={isPickerOpen}
+                onClose={() => setIsPickerOpen(false)}
+                onSelect={handleMembersSelect}
+                excludeUserIds={members.map((member) => member.userId)}
+            />
         </section>
     );
 }

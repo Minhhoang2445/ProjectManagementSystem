@@ -1,5 +1,12 @@
-import api from "@/lib/axios";  
-import { get } from "react-hook-form";
+import api from "@/lib/axios";
+import type { Project, ProjectMember } from "@/types/Project";
+
+export type UpdateProjectPayload = Partial<
+    Pick<Project, "name" | "description" | "status" | "startDate" | "endDate">
+> & {
+    members?: Array<{ userId: number; role: ProjectMember["roleInProject"] }>;
+};
+
 export const projectService = {
     getAll: async () => {
         const res = await api.get("/project");
@@ -15,6 +22,7 @@ export const projectService = {
         description: string,
         startDate: string,
         endDate: string,
+        status: Project["status"],
         members: { userId: number; role: string }[]
     ) => {
         const res = await api.post("/project", {
@@ -22,12 +30,17 @@ export const projectService = {
             description,
             startDate,
             endDate,
-            members
+            status,
+            members,
         });
+        return res.data;
+    },
+    update: async (projectId: number, payload: UpdateProjectPayload) => {
+        const res = await api.patch(`/project/${projectId}`, payload);
         return res.data;
     },
     getUserProjects: async () => {
         const res = await api.get(`/project/user/me/projects`);
         return res.data;
-    }
+    },
 };

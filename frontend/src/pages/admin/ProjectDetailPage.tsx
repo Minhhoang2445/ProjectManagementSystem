@@ -1,16 +1,12 @@
 import { Outlet, useParams } from "react-router";
 import { useEffect, useState } from "react";
 import { projectService } from "@/services/projectService";
-import ProjectHeader from "@/components/project/ProjectHeader";
 import ProjectDetailNavBar from "@/components/project/ProjectDetailNavBar";
 import ProjectBreadcrumb from "@/components/project/ProjectBreadcrumb";
 import type { Project } from "@/types/Project";
-import TaskNavbar from "@/components/task/TaskNavbar";
-import { useLocation } from "react-router";
 
 export default function ProjectDetailPage() {
   const { projectId } = useParams();
-  const location = useLocation();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -40,7 +36,6 @@ export default function ProjectDetailPage() {
         <ProjectDetailNavBar />
       </div>
       <div className="w-full">
-        {location.pathname.includes("/tasks") && <TaskNavbar />}
         <div className="p-6 space-y-6">
           {/* CONTENT */}
           <Outlet context={{ project }} />

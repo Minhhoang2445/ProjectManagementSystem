@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useOutletContext, useParams } from "react-router";
 import { AlertTriangle, CalendarClock, CheckCircle, ListChecks, Users } from "lucide-react";
 import type { Project } from "@/types/Project";
 import type { Task } from "@/types/Task";
 import { projectService } from "@/services/projectService";
 import { taskService } from "@/services/taskService";
+import ProjectManageControls from "@/components/project/ProjectManageControls";
 
 type OutletContext = {
     project: Project;
@@ -42,6 +43,7 @@ const STATUS_LABELS: Record<Task["status"], string> = {
     done: "Done",
     cancelled: "Cancelled",
 };
+
 
 export default function ProjectOverview() {
     const { project } = useOutletContext<OutletContext>();
@@ -156,101 +158,114 @@ export default function ProjectOverview() {
         return map;
     }, [tasks]);
 
+    const applyUpdatedProject = useCallback((updatedProject?: Project | null) => {
+        if (!updatedProject) return;
+        setAnalyticsProject(updatedProject);
+        setProjectTasks((prevTasks) => {
+            if (Array.isArray(updatedProject.tasks)) {
+                return updatedProject.tasks as Task[];
+            }
+            return prevTasks;
+        });
+    }, []);
+
     return (
         <div className="space-y-6">
-            <section className="rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/85">
+            <section className="rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Project</p>
-                        <h1 className="text-3xl font-semibold text-slate-900 dark:text-white">{analyticsProject.name}</h1>
-                        <p className="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
+                        <h1 className="text-3xl font-semibold text-slate-900">{analyticsProject.name}</h1>
+                        <p className="mt-2 max-w-2xl text-sm text-slate-600">
                             {analyticsProject.description || "No description provided for this project."}
                         </p>
                     </div>
-                    <div className="flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-300">
+                    <div className="flex flex-wrap gap-4 text-sm text-slate-500">
                         <div>
                             <p className="uppercase text-[10px] tracking-widest text-slate-400">Start</p>
-                            <p className="font-semibold text-slate-900 dark:text-white">{timeline.start}</p>
+                            <p className="font-semibold text-slate-900">{timeline.start}</p>
                         </div>
                         <div>
                             <p className="uppercase text-[10px] tracking-widest text-slate-400">End</p>
-                            <p className="font-semibold text-slate-900 dark:text-white">{timeline.end}</p>
+                            <p className="font-semibold text-slate-900">{timeline.end}</p>
                         </div>
                         <div>
                             <p className="uppercase text-[10px] tracking-widest text-slate-400">Members</p>
-                            <p className="font-semibold text-slate-900 dark:text-white">{members.length}</p>
+                            <p className="font-semibold text-slate-900">{members.length}</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <div className="rounded-xl border border-slate-100 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/70">
+                    <div className="rounded-xl border border-slate-100 bg-white/90 p-4 shadow-sm">
                         <div className="flex items-center justify-between text-xs font-semibold uppercase text-slate-500">
                             Completion
                             <CheckCircle className="h-4 w-4 text-emerald-500" />
                         </div>
-                        <p className="mt-3 text-3xl font-semibold text-slate-900 dark:text-white">{summary.completion}%</p>
-                        <div className="mt-3 h-2 rounded-full bg-slate-100 dark:bg-slate-800">
+                        <p className="mt-3 text-3xl font-semibold text-slate-900">{summary.completion}%</p>
+                        <div className="mt-3 h-2 rounded-full bg-slate-100">
                             <div
                                 className="h-full rounded-full bg-gradient-to-r from-sky-500 to-emerald-500"
                                 style={{ width: `${summary.completion}%` }}
                             />
                         </div>
-                        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                        <p className="mt-2 text-xs text-slate-500">
                             {summary.done}/{summary.total || 0} tasks done
                         </p>
                     </div>
 
-                    <div className="rounded-xl border border-slate-100 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/70">
+                    <div className="rounded-xl border border-slate-100 bg-white/90 p-4 shadow-sm">
                         <div className="flex items-center justify-between text-xs font-semibold uppercase text-slate-500">
                             Active tasks
                             <ListChecks className="h-4 w-4 text-sky-500" />
                         </div>
-                        <p className="mt-3 text-3xl font-semibold text-slate-900 dark:text-white">{summary.toDo + summary.inProgress + summary.review}</p>
-                        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                        <p className="mt-3 text-3xl font-semibold text-slate-900">{summary.toDo + summary.inProgress + summary.review}</p>
+                        <p className="mt-2 text-xs text-slate-500">
                             {summary.inProgress} building · {summary.review} in review
                         </p>
                     </div>
 
-                    <div className="rounded-xl border border-slate-100 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/70">
+                    <div className="rounded-xl border border-slate-100 bg-white/90 p-4 shadow-sm">
                         <div className="flex items-center justify-between text-xs font-semibold uppercase text-slate-500">
                             Overdue
                             <AlertTriangle className="h-4 w-4 text-rose-500" />
                         </div>
-                        <p className={`mt-3 text-3xl font-semibold ${summary.overdue ? "text-rose-500" : "text-slate-900 dark:text-white"}`}>
+                        <p className={`mt-3 text-3xl font-semibold ${summary.overdue ? "text-rose-500" : "text-slate-900"}`}>
                             {summary.overdue}
                         </p>
-                        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Escalate blockers early.</p>
+                        <p className="mt-2 text-xs text-slate-500">Escalate blockers early.</p>
                     </div>
 
-                    <div className="rounded-xl border border-slate-100 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/70">
+                    <div className="rounded-xl border border-slate-100 bg-white/90 p-4 shadow-sm">
                         <div className="flex items-center justify-between text-xs font-semibold uppercase text-slate-500">
                             Squad size
                             <Users className="h-4 w-4 text-purple-500" />
                         </div>
-                        <p className="mt-3 text-3xl font-semibold text-slate-900 dark:text-white">{members.length}</p>
-                        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{analyticsProject.status?.replace("_", " ") ?? "status"}</p>
+                        <p className="mt-3 text-3xl font-semibold text-slate-900">{members.length}</p>
+                        <p className="mt-2 text-xs text-slate-500">{analyticsProject.status?.replace("_", " ") ?? "status"}</p>
                     </div>
                 </div>
             </section>
 
+            <ProjectManageControls project={analyticsProject} onProjectUpdated={applyUpdatedProject} />
+
             <section className="grid gap-6 xl:grid-cols-3">
                 <div className="space-y-6 xl:col-span-2">
-                    <div className="rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/85">
+                    <div className="rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-sm">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs font-semibold uppercase text-slate-400">Task pipeline</p>
-                                <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Status breakdown</h2>
+                                <h2 className="text-xl font-semibold text-slate-900">Status breakdown</h2>
                             </div>
-                            <span className="text-xs text-slate-500 dark:text-slate-400">{summary.total} total tasks</span>
+                            <span className="text-xs text-slate-500">{summary.total} total tasks</span>
                         </div>
                         <div className="mt-6 grid gap-4 md:grid-cols-2">
                             {statusBreakdown.map((bucket) => (
-                                <div key={bucket.key} className="rounded-xl border border-slate-100 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/70">
+                                <div key={bucket.key} className="rounded-xl border border-slate-100 bg-white/90 p-4 shadow-sm">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm font-semibold text-slate-900 dark:text-white">{STATUS_LABELS[bucket.key]}</p>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">{bucket.count} tasks</p>
+                                            <p className="text-sm font-semibold text-slate-900">{STATUS_LABELS[bucket.key]}</p>
+                                            <p className="text-xs text-slate-500">{bucket.count} tasks</p>
                                         </div>
                                         <div className={`h-8 w-8 rounded-full ${bucket.accent}`} />
                                     </div>
@@ -259,22 +274,22 @@ export default function ProjectOverview() {
                         </div>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/85">
+                    <div className="rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-sm">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs font-semibold uppercase text-slate-400">Upcoming</p>
-                                <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Deadlines</h2>
+                                <h2 className="text-xl font-semibold text-slate-900">Deadlines</h2>
                             </div>
                             <CalendarClock className="h-5 w-5 text-slate-400" />
                         </div>
                         {upcomingTasks.length === 0 ? (
-                            <p className="mt-6 text-sm text-slate-500 dark:text-slate-400">No deadlines in the next 10 days.</p>
+                            <p className="mt-6 text-sm text-slate-500">No deadlines in the next 10 days.</p>
                         ) : (
                             <div className="mt-6 space-y-4">
                                 {upcomingTasks.map((task) => (
-                                    <div key={task.id} className="rounded-xl border border-slate-100 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/70">
+                                    <div key={task.id} className="rounded-xl border border-slate-100 bg-white/90 p-4 shadow-sm">
                                         <div className="flex flex-wrap items-center gap-3">
-                                            <p className="flex-1 text-sm font-semibold text-slate-900 dark:text-white">{task.title}</p>
+                                            <p className="flex-1 text-sm font-semibold text-slate-900">{task.title}</p>
                                             <span className={`text-xs font-semibold ${(() => {
                                                 const remaining = daysUntil(task.dueDate);
                                                 if (remaining === null) return "text-slate-500";
@@ -291,7 +306,7 @@ export default function ProjectOverview() {
                                                 })()}
                                             </span>
                                         </div>
-                                        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+                                        <p className="mt-2 line-clamp-2 text-xs text-slate-500">
                                             {task.description || "No description provided."}
                                         </p>
                                     </div>
@@ -302,15 +317,15 @@ export default function ProjectOverview() {
                 </div>
 
                 <div className="space-y-6">
-                    <div className="rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/85">
+                    <div className="rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-sm">
                         <p className="text-xs font-semibold uppercase text-slate-400">Timeline</p>
-                        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Schedule health</h2>
+                        <h2 className="text-xl font-semibold text-slate-900">Schedule health</h2>
                         <div className="mt-5 space-y-3 text-sm">
-                            <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
+                            <div className="flex items-center justify-between text-slate-600">
                                 <span>Duration</span>
                                 <span>{timeline.durationDays ? `${timeline.durationDays} days` : "—"}</span>
                             </div>
-                            <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
+                            <div className="flex items-center justify-between text-slate-600">
                                 <span>Time remaining</span>
                                 <span>
                                     {timeline.remainingDays === null
@@ -321,7 +336,7 @@ export default function ProjectOverview() {
                                 </span>
                             </div>
                         </div>
-                        <div className="mt-6 h-2 rounded-full bg-slate-100 dark:bg-slate-800">
+                        <div className="mt-6 h-2 rounded-full bg-slate-100">
                             <div
                                 className={`h-full rounded-full ${timeline.remainingDays !== null && timeline.remainingDays < 0 ? "bg-rose-500" : "bg-sky-500"}`}
                                 style={{
@@ -336,10 +351,10 @@ export default function ProjectOverview() {
                         </div>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/85">
+                    <div className="rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-sm">
                         <p className="text-xs font-semibold uppercase text-slate-400">Risks</p>
-                        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Attention list</h2>
-                        <ul className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
+                        <h2 className="text-xl font-semibold text-slate-900">Attention list</h2>
+                        <ul className="mt-4 space-y-3 text-sm text-slate-600">
                             <li className="flex items-center gap-3">
                                 <AlertTriangle className={`h-4 w-4 ${summary.overdue ? "text-rose-500" : "text-slate-400"}`} />
                                 {summary.overdue ? `${summary.overdue} overdue tasks need escalation.` : "No overdue tasks."}
@@ -357,12 +372,12 @@ export default function ProjectOverview() {
                 </div>
             </section>
             {error && (
-                <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
                     {error}
                 </div>
             )}
             {loading && (
-                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-2 text-sm text-slate-500">
                     <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-sky-500" />
                     Syncing latest stats…
                 </div>
