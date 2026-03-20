@@ -135,7 +135,6 @@ export default function ProjectManageControls({ project, onProjectUpdated }: Pro
             <section className="rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Collaboration</p>
                         <h2 className="text-xl font-semibold text-slate-900">Admin & leader controls</h2>
                         <p className="text-sm text-slate-500">
                             Update project metadata or invite new teammates without leaving this page.
