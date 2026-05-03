@@ -30,5 +30,6 @@ export const updateUserAvatarController = async (req, res) => {
         console.log("Lỗi khi cập nhật avatar", error);
         return res.status(500).json({ message: "Lỗi hệ thống" });
     }
+    
 };
 
