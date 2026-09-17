@@ -21,3 +21,6 @@ module "vpc" {
     private_subnet_cidrs = var.private_subnet_cidrs
     private_subnet_azs = var.private_subnet_azs
 }
+module "security"{
+    source = "./modules/security"
+}
