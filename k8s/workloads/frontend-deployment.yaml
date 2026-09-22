@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: project-management-system
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: frontend
+
+  template:
+    metadata:
+      labels:
+        app: frontend
+
+    spec:
+      containers:
+        - name: frontend-container
+          image: pms_frontend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: VITE_API_URL
+              value: "/api"
