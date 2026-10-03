@@ -30,3 +30,16 @@ variable "private_subnet_azs" {
   description = "List of availability zones for private subnets"
   type        = list(string)
 }
+variable "db_name" {
+  description = "Name for db"
+  type = string
+}
+variable "db_username" {
+  description = "Username for db"
+  type = string
+}
+variable "db_password" {
+  description = "Password for db"
+  type = string
+}
+

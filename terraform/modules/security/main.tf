@@ -1,26 +1,73 @@
 # configiguration for security
-resource "aws_network_acl" "main" {
-  vpc_id = aws_vpc.main.id
 
-  egress {
-    protocol   = "tcp"
-    rule_no    = 200
-    action     = "allow"
-    cidr_block = "10.3.0.0/18"
-    from_port  = 443
-    to_port    = 443
+resource "aws_security_group" "alb" {
+  name        = "${var.environment}-alb-sg"
+  description = "Security group for application load balancer"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    protocol   = "tcp"
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "10.3.0.0/18"
-    from_port  = 80
-    to_port    = 80
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
-    Name = "main"
+    Name        = "${var.environment}-alb-sg"
+    Environment = var.environment
+  }
+}
+
+resource "aws_security_group" "app"{
+  name       = "${var.environment}-app-sg"
+  description = "Security group for application servers"
+  vpc_id      = var.vpc_id
+  ingress {
+    description = "Allow HTTP traffic from ALB"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+  egress {
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+}
+resource "aws_security_group" "database" {
+  name = "${var.environment}-database-sg"
+  description = "Security group for database"
+  vpc_id = var.vpc_id
+  ingress {
+    description = "Allow RDS access from application servers"
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    security_groups = [aws_security_group.app.id]
+  }
+  egress {
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
