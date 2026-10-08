@@ -1,0 +1,23 @@
+---
+- name: install containerd and config cgroup
+  hosts: all
+  become: true
+  vars_files:
+    - ../vars/containerd.yml
+  tasks:
+    - name: Install containerd
+      ansible.builtin.package:
+        name: containerd
+        state: present
+        update_cache: true
+
+    - name: Configure containerd
+      ansible.builtin.template:
+        src: ../templates/containerd_config.toml.j2
+        dest: /etc/containerd/config.toml
+        
+    - name: Enable and start containerd
+      ansible.builtin.systemd:
+        name: containerd
+        enabled: true
+        state: started
