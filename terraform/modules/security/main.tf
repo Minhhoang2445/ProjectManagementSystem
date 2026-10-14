@@ -18,7 +18,13 @@ resource "aws_security_group" "alb" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
+  ingress{
+    description = "allow ping"
+    from_port = -1
+    to_port = -1
+    protocol = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   egress {
     from_port   = 0
     to_port     = 0
@@ -31,7 +37,28 @@ resource "aws_security_group" "alb" {
     Environment = var.environment
   }
 }
+resource "aws_security_group" "bastion" {
+  name        = "${var.environment}-bastion-sg"
+  description = "Security group for bastion host"
+  vpc_id      = var.vpc_id
 
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name        = "${var.environment}-bastion-sg"
+    Environment = var.environment
+  }
+}
 resource "aws_security_group" "app"{
   name       = "${var.environment}-app-sg"
   description = "Security group for application servers"
@@ -42,6 +69,20 @@ resource "aws_security_group" "app"{
     to_port     = 80
     protocol    = "tcp"
     security_groups = [aws_security_group.alb.id]
+  }
+  ingress {
+    description = "Allow SSH traffic from bastion host"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    security_groups = [aws_security_group.bastion.id]
+  }
+  ingress{
+      description = "allow ping"
+      from_port = -1
+      to_port = -1
+      protocol = "icmp"
+      security_groups = [aws_security_group.bastion.id]
   }
   egress {
     description = "Allow all outbound traffic"

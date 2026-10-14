@@ -35,3 +35,24 @@ module "rds"{
     db_password = var.db_password
     security_group_ids = module.security.database_security_group_id
 }
+module "asg" {
+    source = "./modules/asg"
+    environment = var.environment
+    instance_type = var.instance_type
+    key_name = var.key_name
+    security_group_ids = module.security.app_security_group_id
+    private_subnet_ids = module.vpc.private_subnet_ids
+    bastion_security_group_id = module.security.bastion_security_group_id
+    target_group_arns = [module.alb.target_group_arn]
+    min_size = var.min_size
+    max_size = var.max_size
+    desired_capacity = var.desired_capacity
+    public_subnet_ids = module.vpc.public_subnet_ids
+}
+module "alb" {
+  source = "./modules/alb"
+  environment     = var.environment
+  vpc_id         = module.vpc.vpc_id
+  public_subnets = module.vpc.public_subnet_ids
+  alb_security_group_id = module.security.alb_security_group_id
+}
