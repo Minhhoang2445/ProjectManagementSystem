@@ -5,6 +5,7 @@
 
   vars_files:
     - ../vars/kubernetes.yml
+    - ../vars/pass.yml
 
   tasks:
 
@@ -78,7 +79,8 @@
 - name: Install kubectl on control plane
   hosts: k8s_master
   become: true
-
+  vars_files:
+    - ../vars/pass.yml
   tasks:
 
     - name: Install kubectl

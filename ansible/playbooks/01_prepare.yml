@@ -2,7 +2,8 @@
 - name: prepare Kubernetes nodes
   hosts: all
   become: true 
-
+  vars_files:
+    - ../vars/pass.yml
 
   tasks:
     - name: disabled swap immediately

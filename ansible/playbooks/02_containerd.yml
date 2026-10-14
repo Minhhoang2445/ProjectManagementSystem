@@ -4,13 +4,18 @@
   become: true
   vars_files:
     - ../vars/containerd.yml
+    - ../vars/pass.yml
   tasks:
     - name: Install containerd
       ansible.builtin.package:
         name: containerd
         state: present
         update_cache: true
-
+    - name: Create containerd configuration directory
+      ansible.builtin.file:
+        path: /etc/containerd
+        state: directory
+        mode: '0755'
     - name: Configure containerd
       ansible.builtin.template:
         src: ../templates/containerd_config.toml.j2

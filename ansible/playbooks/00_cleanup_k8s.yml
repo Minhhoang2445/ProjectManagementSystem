@@ -2,7 +2,7 @@
 - name: Clean Kubernetes from all nodes
   hosts: all
   become: true
-
+  
   tasks:
     - name: Stop kubelet
       ansible.builtin.systemd:
