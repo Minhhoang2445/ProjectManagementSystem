@@ -8,6 +8,7 @@ on:
       - 'backend/**'
       - 'frontend/**'
       - '.github/workflows/docker-build.yml'
+  workflow_dispatch:
   
 jobs:
   docker:
