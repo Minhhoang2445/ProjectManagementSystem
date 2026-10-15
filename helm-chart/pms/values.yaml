@@ -4,7 +4,7 @@ frontend:
   replicaCount: 1
   image:
     repository: binheo2445/pms_frontend
-    tag: latest
+    tag: 419bc99023733744a58776141056a8bec2f499b9
     pullPolicy: Never
   containerPort: 8080
   service:
@@ -20,7 +20,7 @@ backend:
   replicaCount: 1
   image:
     repository: binheo2445/pms_backend
-    tag: latest
+    tag: 419bc99023733744a58776141056a8bec2f499b9
     pullPolicy: Never
   containerPort: 5000
   service:
