@@ -56,7 +56,7 @@ database:
     accessModes:
       - ReadWriteOnce
     size: 5Gi
-    storageClassName: ""
+    storageClassName: local-path
     mountPath: /var/lib/postgresql/data
   resources:
     requests:
