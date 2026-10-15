@@ -1,0 +1,33 @@
+# The chart defaults reproduce the current manifests. Add only reviewed
+# development overrides here.
+# Development environment overrides
+# Development environment overrides
+
+namespace: project-management-system
+
+frontend:
+  replicaCount: 1
+  image:
+    tag: latest
+    pullPolicy: Always
+
+backend:
+  replicaCount: 1
+  image:
+    tag: latest
+    pullPolicy: Always
+
+database:
+  replicaCount: 1
+  image:
+    tag: "15"
+    pullPolicy: IfNotPresent
+  persistence:
+    enabled: true
+    claimName: postgres-pvc
+    size: 5Gi
+
+gateway:
+  enabled: true
+  httpRoute:
+    enabled: true
