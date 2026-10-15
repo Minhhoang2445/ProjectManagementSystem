@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: frontend-container
-          image: pms_frontend:latest
+          image: binheo2445/pms_frontend:latest
           imagePullPolicy: Never
           ports:
             - containerPort: 8080

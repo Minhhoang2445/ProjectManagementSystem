@@ -4,11 +4,14 @@ metadata:
   name: postgres-service
   namespace: project-management-system
 spec:
+  selector:
+    app: postgres
   ports:
     - name: postgres
       port: 5432
       targetPort: 5432
       protocol: TCP
+  type: ClusterIP
   
 
 

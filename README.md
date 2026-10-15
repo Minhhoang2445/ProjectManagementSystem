@@ -102,6 +102,34 @@ Uploaded avatars and attachments are saved under `uploads/avatars` and `uploads/
 - Run `npm run build` in `frontend/` and serve the `dist` folder via your preferred host or behind a CDN.
 - For backend deployments, run database migrations (`npx prisma migrate deploy`) during release pipelines before starting the server.
 
+### Helm deployment
+
+The Helm chart under [`k8s/helm-chart/pms`](./k8s/helm-chart/pms) mirrors the existing application-owned Kubernetes resources. The original manifests under `k8s/` are retained for comparison.
+
+Create the namespace and render the chart without contacting a cluster:
+
+```bash
+helm template pms k8s/helm-chart/pms \
+  --namespace project-management-system
+```
+
+Before installing, provision the existing `backend-secret` and `postgres-secret`
+resources in `project-management-system`. Their credential values are intentionally
+not stored in the chart or its values files. The chart does not install the
+namespace or the Traefik `GatewayClass`; those are managed separately.
+
+Install or upgrade the application after reviewing the rendered output:
+
+```bash
+helm upgrade --install pms k8s/helm-chart/pms \
+  --namespace project-management-system \
+  --create-namespace
+```
+
+The chart preserves the existing `postgres-pvc` name and database Deployment
+semantics. Do not uninstall or replace that PVC as part of a Helm migration without
+an explicit data migration and ownership plan.
+
 ## Contributing
 
 1. Create a feature branch from `main`.
