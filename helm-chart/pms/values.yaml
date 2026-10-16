@@ -74,6 +74,10 @@ config:
 
 gateway:
   enabled: true
+  gatewayClass:
+    create: true
+    name: traefik-gateway-class
+    controllerName: traefik.io/gateway-controller
   name: backend-gateway
   className: traefik-gateway-class
   listener:
