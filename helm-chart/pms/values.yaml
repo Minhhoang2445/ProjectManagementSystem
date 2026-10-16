@@ -6,11 +6,11 @@ frontend:
     repository: binheo2445/pms_frontend
     tag: 419bc99023733744a58776141056a8bec2f499b9
     pullPolicy: Never
-  containerPort: 8080
+  containerPort: 80
   service:
     name: frontend-service
     port: 8080
-    targetPort: 8080
+    targetPort: 80
     type: ClusterIP
   env:
     VITE_API_URL: /api
