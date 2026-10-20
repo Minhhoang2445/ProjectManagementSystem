@@ -23,4 +23,15 @@ module "vpc" {
 }
 module "security"{
     source = "./modules/security"
+    environment = var.environment
+    vpc_id = module.vpc.vpc_id
+}
+module "rds"{
+    source = "./modules/rds"
+    environment = var.environment
+    subnet_ids = module.vpc.private_subnet_ids
+    db_name = var.db_name
+    db_username = var.db_username
+    db_password = var.db_password
+    security_group_ids = module.security.database_security_group_id
 }

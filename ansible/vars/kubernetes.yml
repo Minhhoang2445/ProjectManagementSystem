@@ -1,0 +1,2 @@
+kubernetes_version: "1.37"
+kubernetes_repo: "https://pkgs.k8s.io/core:/stable:/v1.37/deb/"

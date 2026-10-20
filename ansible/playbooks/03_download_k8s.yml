@@ -1,0 +1,94 @@
+---
+- name: Install Kubernetes components on all nodes
+  hosts: all
+  become: true
+
+  vars_files:
+    - ../vars/kubernetes.yml
+    - ../vars/pass.yml
+
+  tasks:
+
+    - name: Install packages required for Kubernetes repository
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gpg
+        state: present
+        update_cache: true
+
+    - name: Create APT keyrings directory
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Download Kubernetes repository signing key
+      ansible.builtin.get_url:
+        url: "{{ kubernetes_repo }}Release.key"
+        dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
+        mode: "0644"
+
+    - name: Convert Kubernetes signing key to GPG format
+      ansible.builtin.command:
+        cmd: >
+          gpg
+          --dearmor
+          --yes
+          -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+          /etc/apt/keyrings/kubernetes-apt-keyring.asc
+      args:
+        creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+    - name: Add Kubernetes APT repository
+      ansible.builtin.apt_repository:
+        repo: >
+          deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg]
+          {{ kubernetes_repo }}
+          /
+        filename: kubernetes
+        state: present
+
+    - name: Update APT package index
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Install kubeadm and kubelet
+      ansible.builtin.apt:
+        name:
+          - kubeadm
+          - kubelet
+        state: present
+
+    - name: Hold kubeadm and kubelet
+      ansible.builtin.dpkg_selections:
+        name: "{{ item }}"
+        selection: hold
+      loop:
+        - kubeadm
+        - kubelet
+
+    - name: Enable kubelet
+      ansible.builtin.systemd:
+        name: kubelet
+        enabled: true
+
+
+- name: Install kubectl on control plane
+  hosts: k8s_master
+  become: true
+  vars_files:
+    - ../vars/pass.yml
+  tasks:
+
+    - name: Install kubectl
+      ansible.builtin.apt:
+        name: kubectl
+        state: present
+
+    - name: Hold kubectl
+      ansible.builtin.dpkg_selections:
+        name: kubectl
+        selection: hold
