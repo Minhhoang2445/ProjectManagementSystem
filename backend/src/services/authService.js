@@ -32,7 +32,7 @@ export const registerUserService = async (userData) => {
             designation,
             department,
             role: "staff",
-            status: "pending"
+            status: "active"
         }
     });
 
