@@ -1,10 +1,9 @@
 namespace: project-management-system
-
 frontend:
   replicaCount: 1
   image:
     repository: binheo2445/pms_frontend
-    tag: 419bc99023733744a58776141056a8bec2f499b9
+    tag: 39fbba0f53904718ac4b524d1308649a82b103c7
     pullPolicy: Never
   containerPort: 80
   service:
@@ -15,12 +14,11 @@ frontend:
   env:
     VITE_API_URL: /api
   resources: {}
-
 backend:
   replicaCount: 1
   image:
     repository: binheo2445/pms_backend
-    tag: 419bc99023733744a58776141056a8bec2f499b9
+    tag: 39fbba0f53904718ac4b524d1308649a82b103c7
     pullPolicy: Never
   containerPort: 5000
   service:
@@ -32,7 +30,6 @@ backend:
   secretKeys:
     databaseUrl: DATABASE_URL
   resources: {}
-
 database:
   replicaCount: 1
   image:
@@ -65,13 +62,11 @@ database:
     limits:
       cpu: "1"
       memory: 1Gi
-
 config:
   data:
     POSTGRES_DB: PMS
     POSTGRES_PORT: "5432"
     POSTGRES_HOST: postgres-service
-
 gateway:
   enabled: true
   gatewayClass:
