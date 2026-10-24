@@ -75,7 +75,7 @@ jobs:
         uses: mikefarah/yq@v4.44.3
         with:
           cmd: |
-            yq -i '.frontend.image.tag = strenv(IMAGE_TAG) | .backend.image.tag = strenv(IMAGE_TAG)' k8s/helm-chart/pms/values.yaml
+            yq -i '.frontend.image.tag = strenv(IMAGE_TAG) | .backend.image.tag = strenv(IMAGE_TAG)' helm-chart/pms/values.yaml
 
       - name: Commit and push updated tags
         run: |
@@ -87,6 +87,6 @@ jobs:
             exit 0
           fi
 
-          git add k8s/helm-chart/pms/values.yaml
+          git add helm-chart/pms/values.yaml
           git commit -m "chore(helm): update image tags to ${IMAGE_TAG}"
           git push origin HEAD:main
