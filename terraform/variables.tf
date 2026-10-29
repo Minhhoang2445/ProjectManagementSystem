@@ -42,4 +42,23 @@ variable "db_password" {
   description = "Password for db"
   type = string
 }
-
+variable "instance_type" {
+  description = "Instance type for EC2 instances"
+  type        = string
+}
+variable "key_name" {
+  description = "Key pair name for EC2 instances"
+  type        = string
+}
+variable "min_size" {
+  description = "Minimum size of ASG"
+  type        = number
+}
+variable "max_size" {
+  description = "Maximum size of ASG"
+  type        = number
+}
+variable "desired_capacity" {
+  description = "Desired capacity of ASG"
+  type        = number
+}
