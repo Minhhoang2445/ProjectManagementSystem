@@ -62,3 +62,12 @@ variable "desired_capacity" {
   description = "Desired capacity of ASG"
   type        = number
 }
+
+variable "domain_name" {
+  description = "Domain name for the Route 53 hosted zone"
+  type        = string
+}
+variable "hosted_zone_name" {
+  description = "Name of the Route 53 hosted zone"
+  type        = string
+}

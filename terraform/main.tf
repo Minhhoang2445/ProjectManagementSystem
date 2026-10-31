@@ -56,3 +56,21 @@ module "alb" {
   public_subnets = module.vpc.public_subnet_ids
   alb_security_group_id = module.security.alb_security_group_id
 }
+module "s3" {
+  source = "./modules/s3"
+  environment = var.environment
+  cloudfront_distribution_arn = module.cloudfront.cloudfront_distribution_arn
+}
+module "cloudfront" {
+  source = "./modules/cloudfront"
+  environment = var.environment
+  s3_bucket_domain_name = module.s3.bucket_regional_domain_name
+
+}
+module "route53" {
+  source = "./modules/route53"
+  domain_name = var.domain_name
+  hosted_zone_name = var.hosted_zone_name
+  cloudfront_hosted_zone_id = module.cloudfront.cloudfront_hosted_zone_id
+  cloudfront_domain_name = module.cloudfront.cloudfront_domain_name
+}
