@@ -17,6 +17,8 @@ resource "aws_cloudfront_distribution" "frontend" {
     origin_access_control_id = aws_cloudfront_origin_access_control.s3_oac.id
   }
 
+
+
   default_cache_behavior {
 
     target_origin_id = "pms-s3-origin"

@@ -74,3 +74,8 @@ module "route53" {
   cloudfront_hosted_zone_id = module.cloudfront.cloudfront_hosted_zone_id
   cloudfront_domain_name = module.cloudfront.cloudfront_domain_name
 }
+module "iam" {
+  source = "./modules/iam"
+  bucket_arn = module.s3.bucket_arn
+  distribution_arn = module.cloudfront.cloudfront_distribution_arn
+}
