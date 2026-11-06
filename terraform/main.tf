@@ -73,6 +73,8 @@ module "route53" {
   hosted_zone_name = var.hosted_zone_name
   cloudfront_hosted_zone_id = module.cloudfront.cloudfront_hosted_zone_id
   cloudfront_domain_name = module.cloudfront.cloudfront_domain_name
+  domain_onprem_api_name = var.domain_onprem_api_name
+  list_onprem_api_ip = var.list_onprem_api_ip
 }
 module "iam" {
   source = "./modules/iam"

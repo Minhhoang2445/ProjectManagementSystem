@@ -71,3 +71,11 @@ variable "hosted_zone_name" {
   description = "Name of the Route 53 hosted zone"
   type        = string
 }
+variable "domain_onprem_api_name" {
+  description = "Domain name for the on-premises API"
+  type        = string
+}
+variable "list_onprem_api_ip" {
+  description = "List of IP addresses for the on-premises API"
+  type        = list(string)
+}

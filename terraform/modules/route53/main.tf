@@ -18,3 +18,15 @@ resource "aws_route53_record" "frontend" {
     evaluate_target_health = false
   }
 }
+
+resource "aws_route53_record" "onprem_api" {
+
+  zone_id = data.aws_route53_zone.main.zone_id
+
+  name = var.domain_onprem_api_name
+
+  type = "A"
+
+  ttl = 300
+  records = var.list_onprem_api_ip
+}
