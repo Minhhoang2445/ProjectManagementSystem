@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - "frontend/**"
-      - ".github/workflows/frontend-deploy.yml"
+      - ".github/workflows/frontend-s3.yml"
   workflow_dispatch:
 
 permissions:
@@ -64,7 +64,7 @@ jobs:
           aws s3 sync frontend/dist s3://${{ vars.S3_BUCKET }} \
             --exclude "index.html" \
             --cache-control "public,max-age=31536000,immutable"
-            
+
           aws s3 cp frontend/dist/index.html s3://${{ vars.S3_BUCKET }}/index.html \
             --cache-control "no-cache"
 

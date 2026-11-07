@@ -32,6 +32,7 @@ function App() {
         <Toaster richColors />
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<Navigate to="/signin" replace />} />
             {/* PUBLIC ROUTES */}
             <Route path="/signin" element={<SignInPage />} />
             <Route path="/signup" element={<SignUpPage />} />
