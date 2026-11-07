@@ -1,0 +1,111 @@
+---
+- name: Deploy PMS Helm Chart on K3s master
+  hosts: master
+  become: true
+
+  tasks:
+    - name: Check if Helm is installed
+      ansible.builtin.stat:
+        path: /usr/local/bin/helm
+      register: helm_bin
+
+    - name: Install Helm 3
+      ansible.builtin.shell: |
+        curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      when: not helm_bin.stat.exists
+
+    - name: Install Kubernetes Gateway API standard CRDs
+      ansible.builtin.command:
+        cmd: kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+      changed_when: false
+
+    - name: Configure K3s Traefik to enable Kubernetes Gateway API provider
+      ansible.builtin.copy:
+        dest: /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
+        mode: "0644"
+        content: |
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRole
+          metadata:
+            name: traefik-gateway-api-extra
+          rules:
+            - apiGroups: [""]
+              resources: ["nodes", "namespaces", "pods", "services", "secrets", "endpoints"]
+              verbs: ["get", "list", "watch"]
+            - apiGroups: ["discovery.k8s.io"]
+              resources: ["endpointslices"]
+              verbs: ["get", "list", "watch"]
+            - apiGroups: ["gateway.networking.k8s.io"]
+              resources: ["gatewayclasses", "gateways", "httproutes", "referencegrants", "tcproutes", "tlsroutes", "grpcroutes"]
+              verbs: ["get", "list", "watch"]
+            - apiGroups: ["gateway.networking.k8s.io"]
+              resources: ["gatewayclasses/status", "gateways/status", "httproutes/status", "tcproutes/status", "tlsroutes/status", "grpcroutes/status"]
+              verbs: ["update"]
+          ---
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRoleBinding
+          metadata:
+            name: traefik-gateway-api-extra
+          roleRef:
+            apiGroup: rbac.authorization.k8s.io
+            kind: ClusterRole
+            name: traefik-gateway-api-extra
+          subjects:
+            - kind: ServiceAccount
+              name: traefik
+              namespace: kube-system
+          ---
+          apiVersion: helm.cattle.io/v1
+          kind: HelmChartConfig
+          metadata:
+            name: traefik
+            namespace: kube-system
+          spec:
+            valuesContent: |-
+              image:
+                repository: traefik
+                tag: v3.1.4
+              additionalArguments:
+                - "--providers.kubernetesgateway=true"
+              gateway:
+                enabled: false
+              gatewayClass:
+                enabled: false
+
+    - name: Ensure namespace project-management-system exists
+      ansible.builtin.shell: |
+        kubectl create namespace project-management-system --dry-run=client -o yaml | kubectl apply -f -
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+      changed_when: false
+
+    - name: Ensure backend-jwt-secret exists in project-management-system
+      ansible.builtin.shell: |
+        kubectl create secret generic backend-jwt-secret \
+          --namespace project-management-system \
+          --from-literal=ACCESS_TOKEN_SECRET="pms_super_secret_jwt_key_2026" \
+          --dry-run=client -o yaml | kubectl apply -f -
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+      changed_when: false
+
+    - name: Copy helm-chart/pms to master node
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../../helm-chart/pms"
+        dest: "/home/{{ ansible_user }}/"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0755"
+
+    - name: Deploy PMS application using Helm
+      ansible.builtin.command:
+        cmd: >
+          /usr/local/bin/helm upgrade --install pms /home/{{ ansible_user }}/pms
+          --namespace project-management-system
+          -f /home/{{ ansible_user }}/pms/values.yaml
+          -f /home/{{ ansible_user }}/pms/values-dev.yaml
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+

@@ -1,0 +1,25 @@
+---
+- name: Download K3s installation script and prerequisites on all nodes
+  hosts: all
+  become: true
+
+  vars_files:
+    - ../vars/k3s.yml
+
+  tasks:
+    - name: Install required system packages for K3s
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gpg
+        state: present
+        update_cache: true
+
+    - name: Download official K3s install script
+      ansible.builtin.get_url:
+        url: "{{ k3s_install_script_url }}"
+        dest: /usr/local/bin/k3s-install.sh
+        mode: "0755"
+

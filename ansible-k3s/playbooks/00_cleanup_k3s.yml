@@ -1,0 +1,39 @@
+---
+- name: Clean K3s from all nodes
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Check if k3s-uninstall.sh exists (Master)
+      ansible.builtin.stat:
+        path: /usr/local/bin/k3s-uninstall.sh
+      register: k3s_server_uninstall
+
+    - name: Uninstall K3s Server
+      ansible.builtin.command:
+        cmd: /usr/local/bin/k3s-uninstall.sh
+      when: k3s_server_uninstall.stat.exists
+      failed_when: false
+
+    - name: Check if k3s-agent-uninstall.sh exists (Worker)
+      ansible.builtin.stat:
+        path: /usr/local/bin/k3s-agent-uninstall.sh
+      register: k3s_agent_uninstall
+
+    - name: Uninstall K3s Agent
+      ansible.builtin.command:
+        cmd: /usr/local/bin/k3s-agent-uninstall.sh
+      when: k3s_agent_uninstall.stat.exists
+      failed_when: false
+
+    - name: Remove K3s configuration and data directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/rancher/k3s
+        - /var/lib/rancher/k3s
+        - /var/lib/kubelet
+        - /usr/local/bin/k3s-install.sh
+        - /home/{{ ansible_user }}/.kube
+

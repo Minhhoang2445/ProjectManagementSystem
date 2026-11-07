@@ -1,0 +1,90 @@
+---
+- name: Prepare K3s nodes
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Set unique hostname for each node
+      ansible.builtin.hostname:
+        name: "{{ inventory_hostname }}"
+
+    - name: Ensure hostname is in /etc/hosts
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.1\.1'
+        line: "127.0.1.1 {{ inventory_hostname }}"
+        state: present
+
+    - name: Disable swap immediately
+      ansible.builtin.command:
+        cmd: swapoff -a
+      changed_when: false
+
+    - name: Disable swap permanently
+      ansible.builtin.replace:
+        path: /etc/fstab
+        regexp: '^(\s*[^#].*\s+swap\s+.*)$'
+        replace: '# \1'
+
+    - name: Check if running on Raspberry Pi (/boot/firmware/cmdline.txt)
+      ansible.builtin.stat:
+        path: /boot/firmware/cmdline.txt
+      register: rpi_cmdline
+
+    - name: Install extra kernel modules for Raspberry Pi (VXLAN/bridge support)
+      ansible.builtin.apt:
+        name: linux-modules-extra-raspi
+        state: present
+        update_cache: true
+      when: ansible_architecture == "aarch64" and rpi_cmdline.stat.exists
+      register: rpi_modules
+
+    - name: Enable cgroup memory on Raspberry Pi (/boot/firmware/cmdline.txt)
+      ansible.builtin.replace:
+        path: /boot/firmware/cmdline.txt
+        regexp: '^((?!.*cgroup_memory=1).*)$'
+        replace: '\1 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory'
+      when: rpi_cmdline.stat.exists
+      register: rpi_cgroup
+
+    - name: Reboot Raspberry Pi if cgroups or kernel modules were updated
+      ansible.builtin.reboot:
+        msg: "Rebooting Raspberry Pi to apply cgroup and kernel module changes"
+        connect_timeout: 5
+        reboot_timeout: 300
+        pre_reboot_delay: 0
+        post_reboot_delay: 15
+      when: (rpi_cgroup is defined and rpi_cgroup.changed) or (rpi_modules is defined and rpi_modules.changed)
+
+    - name: Load overlay kernel module
+      ansible.builtin.modprobe:
+        name: overlay
+        state: present
+
+    - name: Load br_netfilter kernel module
+      ansible.builtin.modprobe:
+        name: br_netfilter
+        state: present
+
+    - name: Persist K3s kernel modules
+      ansible.builtin.copy:
+        dest: /etc/modules-load.d/k3s.conf
+        content: |
+          overlay
+          br_netfilter
+        mode: "0644"
+
+    - name: Configure K3s networking sysctl
+      ansible.builtin.copy:
+        dest: /etc/sysctl.d/k3s.conf
+        content: |
+          net.ipv4.ip_forward = 1
+          net.bridge.bridge-nf-call-iptables = 1
+          net.bridge.bridge-nf-call-ip6tables = 1
+        mode: "0644"
+
+    - name: Apply sysctl settings
+      ansible.builtin.command:
+        cmd: sysctl --system
+      changed_when: false
+

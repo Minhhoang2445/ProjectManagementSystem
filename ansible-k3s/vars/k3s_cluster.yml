@@ -1,0 +1,4 @@
+pod_network_cidr: "10.42.0.0/16"
+control_plane_ip: "192.168.15.133"
+k3s_server_Port: 6443
+
