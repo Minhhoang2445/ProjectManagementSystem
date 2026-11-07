@@ -40,13 +40,13 @@ jobs:
 
       - name: Check required variables
         run: |
-          test -n "${{ vars.API_URL }}" || { echo "API_URL is empty"; exit 1; }
+          test -n "${{ vars.VITE_API_URL }}" || { echo "VITE_API_URL is empty"; exit 1; }
 
       - name: Build frontend
         working-directory: frontend
         run: npm run build
         env:
-          VITE_API_URL: ${{ vars.API_URL }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
 
       - name: Verify build
         run: |
