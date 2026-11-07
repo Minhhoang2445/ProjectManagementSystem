@@ -3,7 +3,7 @@ frontend:
   replicaCount: 1
   image:
     repository: binheo2445/pms_frontend
-    tag: ec86e579193e99f57881cc86a830fb9a734035a3
+    tag: 1bfd9646305311b1dd5af6234d334f14905b5d51
     pullPolicy: Never
   containerPort: 80
   service:
@@ -18,7 +18,7 @@ backend:
   replicaCount: 1
   image:
     repository: binheo2445/pms_backend
-    tag: ec86e579193e99f57881cc86a830fb9a734035a3
+    tag: 1bfd9646305311b1dd5af6234d334f14905b5d51
     pullPolicy: Never
   containerPort: 5000
   service:
