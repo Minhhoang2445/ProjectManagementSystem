@@ -44,6 +44,8 @@ database:
     user: POSTGRES_USER
     password: POSTGRES_PASSWORD
     database: POSTGRES_DB
+  secret:
+    create: false
   persistence:
     enabled: true
     claimName: postgres-pvc
