@@ -6,12 +6,12 @@
 namespace: project-management-system
 
 frontend:
-  replicaCount: 1
+  replicaCount: 3
   image:
     pullPolicy: IfNotPresent
 
 backend:
-  replicaCount: 1
+  replicaCount: 3
   image:
     pullPolicy: IfNotPresent
   secret:

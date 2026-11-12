@@ -1,6 +1,5 @@
 namespace: project-management-system
 frontend:
-  replicaCount: 1
   image:
     repository: binheo2445/pms_frontend
     tag: 1bfd9646305311b1dd5af6234d334f14905b5d51
@@ -15,7 +14,6 @@ frontend:
     VITE_API_URL: /api
   resources: {}
 backend:
-  replicaCount: 1
   image:
     repository: binheo2445/pms_backend
     tag: 1bfd9646305311b1dd5af6234d334f14905b5d51
@@ -31,7 +29,6 @@ backend:
     databaseUrl: DATABASE_URL
   resources: {}
 database:
-  replicaCount: 1
   image:
     repository: postgres
     tag: "15"
