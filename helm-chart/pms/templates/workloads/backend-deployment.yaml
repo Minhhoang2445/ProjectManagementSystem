@@ -28,8 +28,8 @@ spec:
             - name: ACCESS_TOKEN_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: backend-jwt-secret
-                  key: ACCESS_TOKEN_SECRET
+                  name: {{ .Values.backend.existingSecret }}
+                  key: {{ .Values.backend.secretKeys.accessTokenSecret }}
 {{- with .Values.backend.resources }}
           resources:
 {{ toYaml . | nindent 12 }}

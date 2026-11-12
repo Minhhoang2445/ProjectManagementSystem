@@ -27,6 +27,7 @@ backend:
   existingSecret: backend-secret
   secretKeys:
     databaseUrl: DATABASE_URL
+    accessTokenSecret: ACCESS_TOKEN_SECRET
   resources: {}
 database:
   image:

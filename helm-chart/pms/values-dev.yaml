@@ -14,12 +14,6 @@ backend:
   replicaCount: 3
   image:
     pullPolicy: IfNotPresent
-  secret:
-    create: true
-    data:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "123456"
-      DATABASE_URL: "postgresql://postgres:123456@postgres-service:5432/PMS?schema=public"
 
 
 database:
@@ -30,12 +24,7 @@ database:
     enabled: true
     claimName: postgres-pvc
     size: 5Gi
-  secret:
-    create: true
-    data:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "123456"
-      POSTGRES_DB: PMS
+
 
 gateway:
   enabled: true
