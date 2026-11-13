@@ -3,7 +3,7 @@ frontend:
   image:
     repository: binheo2445/pms_frontend
     tag: 1bfd9646305311b1dd5af6234d334f14905b5d51
-    pullPolicy: Never
+    pullPolicy: IfNotPresent
   containerPort: 80
   service:
     name: frontend-service
@@ -17,7 +17,7 @@ backend:
   image:
     repository: binheo2445/pms_backend
     tag: 1bfd9646305311b1dd5af6234d334f14905b5d51
-    pullPolicy: Never
+    pullPolicy: IfNotPresent
   containerPort: 5000
   service:
     name: backend-service
