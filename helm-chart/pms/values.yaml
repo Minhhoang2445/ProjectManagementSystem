@@ -28,6 +28,8 @@ backend:
   secretKeys:
     databaseUrl: DATABASE_URL
     accessTokenSecret: ACCESS_TOKEN_SECRET
+  secret:
+    create: false
   resources: {}
 database:
   image:
